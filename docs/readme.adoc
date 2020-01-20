@@ -28,11 +28,11 @@ Some other specification can be supported when using the https://github.com/panv
 
 == How to use the library?
 
-IAMID is provided as a library for implement an OP, so for example using `npm` you can install in your project using:
+IAMID is provided as a library for implement an OP (Openid Provider), so for example using `npm` you can install in your project using:
 
 [source,bash]
 ----
-npm install --save aimid
+npm install --save aimid-provider
 ----
 
 Doing an export of the library we will get available different utils exposes by the library, an early definition can be found in <<library.adoc#,IAMID API>>
@@ -44,4 +44,4 @@ Once exported the library we need to implement/develop some pieces to create our
 * <<endpoints.adoc#,Implement the interactions endpoints>>
 * <<server.adoc#,Putting all together and starting the server>>
 
-A good start point could be to use the Santander-uk project as base and modify the code there.
+A good start point could be to use the https://uk-gitlab.almuk.santanderuk.corp/verified-id/op-server[Santander-uk project] as base and modify the code there.

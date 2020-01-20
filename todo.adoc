@@ -24,9 +24,5 @@
 * Review Jenkins files
 
 == Docs
-* We need to review the npm install command when we deploy this concretely to nexus.
-* When split the project put link sin readme.adoc to the "reference project"
-* review the name of the library in the code snipts exposed in "library.adoc"
 * Should we describe events emitted or we wait for the implementation of functional events and this things??
 * In IamIdRouter in library api we should also add the HTTPError description
-* Sensitive is now exported as an util, need documentation for this.

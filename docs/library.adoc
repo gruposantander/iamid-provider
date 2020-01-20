@@ -13,7 +13,7 @@ toc::[]
 .Creating an IAmId app
 [source,js]
 ----
-const { IAmId } = require('iamid') <1>
+const { IAmId } = require('iamid-provider') <1>
 const app = new IAmId(environment, secrets) <2>
 ----
 <1> First import the `IAmId` class
@@ -59,7 +59,7 @@ app.init().then((app) => { <1>
 .To create your own router implementation
 [source,js]
 ----
-const { IAmIdRouter } = require('iamid') <1>
+const { IAmIdRouter } = require('iamid-provider') <1>
 
 class CustomRouter extends IAmIdRouter { <2>
   constructor (app, connector) { <3>
@@ -139,18 +139,35 @@ And for last the `proxyClaimResolvers` that is a method that accept an array of 
 
 [source,js]
 ----
-const { resolvers : { proxyClaimResolvers } } = require('iamid')
+const { resolvers : { proxyClaimResolvers } } = require('iamid-provider')
 const proxy = proxyClaimResolvers([accountsResolver, identifyMeResolver])
 ----
 
 
 == utils
 
-Inside `utils` module only the utility `normalizePhoneNumber` is exposed, the idea is to add more utils in the future in this namespace. This util just normalize a phone string to E164 format.
+Inside `utils` module we have a couple of utilities, `normalizePhoneNumber` and `Sensitive`. The idea is to add more utils in the future in this namespace.
 
 .How to use normalizePhoneNumber?
 [source,js]
 ----
-const { utils: { normalizePhoneNumber } } = require('iamid')
-const phone = normalizePhoneNumber.normalize('636656767')
+const { utils: { normalizePhoneNumber } } = require('iamid-provider')
+const phone = normalizePhoneNumber('636656767') <1>
+console.log(phone) <2>
 ----
+<1> This util just normalize a phone string to E164 format.
+<2> The console will show `+44636656767`
+
+.How to use Sensitive?
+[source,js]
+----
+const { utils: { Sensitive } } = require('iamid-provider') <1>
+const anObject = {
+    user: 'hello',
+    password: new Sensitive('my awesome password') <1>
+  }
+console.log(JSON.stringify(anObject)) <2>
+----
+<1> This utility a wrapper for sensitive information to avoid that accidentally can be printed in a log for exmaple.
+<2> We just wrap the value in a `Sensitive` object.
+<3> When try to show in the console we will find just `{"user":"hello"}`
