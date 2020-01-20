@@ -31,8 +31,7 @@
 * In IamIdRouter in library api we should also add the HTTPError description
 
 == About split
-* Review libraries that are used
-* review version..
+* review dependencies version..
 * review code coverage.
 * Analize test that dont belong to the library?
 * test event emmiter or just wait for the functional events?

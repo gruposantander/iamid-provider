@@ -39,18 +39,16 @@
     "koa-mount": "^4.0.0",
     "koa-router": "^7.4.0",
     "log4js": "^6.1.0",
-    "mongodb": "3.4.1"
+    "mongodb": "^3.5.1"
   },
   "devDependencies": {
-    "dotenv": "^8.2.0",
-    "husky": "^4.0.0",
+    "husky": "^4.0.10",
     "mocha": "^7.0.0",
-    "mongodb-memory-server": "^6.2.1",
-    "nock": "^11.7.0",
+    "mongodb-memory-server": "^6.2.3",
     "nyc": "^15.0.0",
     "pkce-challenge": "^2.0.0",
     "set-cookie-parser": "^2.4.0",
-    "sinon": "^8.0.4",
+    "sinon": "^8.1.0",
     "standard": "^14.3.1",
     "supertest": "^4.0.2"
   },
