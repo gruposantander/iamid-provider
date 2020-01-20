@@ -29,10 +29,4 @@
 * review the name of the library in the code snipts exposed in "library.adoc"
 * Should we describe events emitted or we wait for the implementation of functional events and this things??
 * In IamIdRouter in library api we should also add the HTTPError description
-
-== About split
-* review dependencies version..
-* review code coverage.
-* Analize test that dont belong to the library?
-* test event emmiter or just wait for the functional events?
-* Should we remove the appender? as is not used??
+* Sensitive is now exported as an util, need documentation for this.

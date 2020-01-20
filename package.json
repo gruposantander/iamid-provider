@@ -1,6 +1,6 @@
 {
   "name": "iamid-provider",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "OpenID, OAuth 2.0 and IAMID Authorization Server implementation for Node.js",
   "main": "index.js",
   "scripts": {
@@ -32,7 +32,6 @@
     "@santander/oidc-provider": "1.0.0-beta.17",
     "debug": "^4.1.1",
     "google-libphonenumber": "^3.2.6",
-    "jsonwebtoken": "^8.5.1",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
     "koa-helmet": "^5.2.0",
@@ -42,6 +41,7 @@
     "mongodb": "^3.5.1"
   },
   "devDependencies": {
+    "jsonwebtoken": "^8.5.1",
     "husky": "^4.0.10",
     "mocha": "^7.0.0",
     "mongodb-memory-server": "^6.2.3",
@@ -56,9 +56,7 @@
     "all": true,
     "include": [
       "lib/**/*.js",
-      "test/**/*.js",
-      "lib-santander-uk/**/*.js",
-      "test-santander-uk/**/*.js"
+      "test/**/*.js"
     ],
     "exclude": [],
     "reporter": [
@@ -67,14 +65,12 @@
       "text"
     ]
   },
-  "standard": {
-    "ignore": [
-      "lib/sensitive.js"
-    ]
-  },
   "husky": {
     "hooks": {
       "pre-commit": "npm i && npm test"
     }
+  },
+  "publishConfig": {
+    "registry": "https://nexus.almuk.santanderuk.corp/repository/npm-releases/"
   }
 }

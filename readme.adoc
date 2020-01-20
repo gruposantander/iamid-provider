@@ -1,0 +1,9 @@
+= IAMID provider
+:toc:
+:toc-placement!:
+
+IAMID is a NodeJs framework on top of an open source OpenId connect implementation https://github.com/panva/node-oidc-provider[oidc-provider], so this product implement an OAuth 2.0 Authorization Server with OpenID Connect and put in top of that the IAMID profile.
+
+toc::[]
+
+Please go to `/docs` folder for more info and instruction about how to use it.
