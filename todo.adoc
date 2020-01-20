@@ -1,0 +1,39 @@
+= ToDo
+
+* Launch all events from a single point, All events should be emitted by app
+* Split tests for lib and impl:
+** events
+**  router
+* Split demo app configuration from test configuration for IAmId
+* IT test add whitelist
+* Move minibank client defaults to configuration
+* Unauthorized test: see coverage
+
+== Backlog
+
+* Test compile method in assertion lang specs
+* Create our own ESLint config (extending standard???)
+
+== Clean Up
+
+* Reduce root files
+* Review Tests
+** Extract common methods (userinfo)
+* Tests in folders by functionality
+* System text are obsolete: remove or update
+* Review Jenkins files
+
+== Docs
+* We need to review the npm install command when we deploy this concretely to nexus.
+* When split the project put link sin readme.adoc to the "reference project"
+* review the name of the library in the code snipts exposed in "library.adoc"
+* Should we describe events emitted or we wait for the implementation of functional events and this things??
+* In IamIdRouter in library api we should also add the HTTPError description
+
+== About split
+* Review libraries that are used
+* review version..
+* review code coverage.
+* Analize test that dont belong to the library?
+* test event emmiter or just wait for the functional events?
+* Should we remove the appender? as is not used??

@@ -1,0 +1,156 @@
+= IAMID Library API
+:toc:
+:toc-placement!:
+
+The IAMID library expose the next pieces to help you build a server:
+
+toc::[]
+
+== IAmId
+
+`IAmId` is an extension of a https://koajs.com/[Koa] app and contain the logic to initialize the configuration, repositories and oidc-provider.
+
+.Creating an IAmId app
+[source,js]
+----
+const { IAmId } = require('iamid') <1>
+const app = new IAmId(environment, secrets) <2>
+----
+<1> First import the `IAmId` class
+<2> Create a new instance passing the `environment` and `secret` configuration.
+
+To Know more in deep the configuration options please have a look to <<config.adoc#,Configuration Reference>>.
+
+The `IAmId` is indeed an instance of a https://koajs.com/[Koa app] so is possible to use any of the method provided by Koa to extends the functionality. To make our `IAmId` works we need to provide the routes defined in a <<IAmIdRouter,IAmIdRouter>> as a normal Koa application.
+
+.Providing routes to app
+[source,js]
+----
+const customRouter = new InteractionRouter(connector, app) <1>
+app.use(customRouter.routes()) <2>
+----
+<1> Given a instance of a `IAmIdRouter`
+<2> Make `use` of the routes in the Koa app.
+
+Once we have `IAmId` instance we should runn the app as follow:
+
+.Running the app
+[source,js]
+----
+app.init().then((app) => { <1>
+  app.listen(port, () => { <2>
+    logger.info(`${pkg.name} listening on port ${port}`)
+  }).on('close', () => {
+    app.close() <3>
+  })
+}).catch((err) => { <4>
+  logger.error(err)
+})
+----
+<1> Call to the `init()` method to mount the oidc-provider routes (Should be done after all routes)
+<2> Start listening on some port with the Koa app.
+<3> In case of app is closed we should call to `IAmId.close()` method to release the resources as the repositories connections...
+<4> In case of any error just report.
+
+== IAmIdRouter
+
+`IAmIdRouter` is an extension of https://github.com/ZijianHe/koa-router[koa-router] that should be extended by developers to implement the interaction <<endpoints.adoc#,endpoints/routes>> and provide the <<connectors.adoc#,connectors>> to IAmId.
+
+.To create your own router implementation
+[source,js]
+----
+const { IAmIdRouter } = require('iamid') <1>
+
+class CustomRouter extends IAmIdRouter { <2>
+  constructor (app, connector) { <3>
+    super(app, connector) <4>
+
+    const INTERACTION_PATH = app.configuration.routes.interaction
+
+    ... // Omitted concretely implementation
+
+    this <5>
+      .post(INTERACTION_PATH + '/:interactionId/login', login)
+      .post(INTERACTION_PATH + '/:interactionId/consent', consent)
+  }
+}
+----
+<1> First import the `IAmIdRouter` class
+<2> Create a class that extends the `IAmIdRouter`
+<3> In the constructor you need to obtain as input an instance of `IAmId` app and instantiated <<connectors.adoc#,connectors>>
+<4> First thing to do in your router constructor is to call `super(app, connector)`
+<5> Provide to the router the <<endpoints.adoc#,implemented interaction routes>>.
+
+`IAmIdRouter` also provide access to two services methods that are important to implement correctly the interaction routes, this methods should be called inside the custom router implementation once the process of login and consent are finished.
+
+.Service methods are
+[source,js]
+----
+async processLogin (userId, ctx, next) <1>
+async acceptConsent (consentData, ctx, next) <2>
+----
+<1> This method should be called when the login process finish and framework can continue with the interaction.
+<2> This method should be called when consent process has finish and framework can continue with the interaction.
+
+More info about this method and how to use it can be found in <<endpoints.adoc#,interaction routes>> docs.
+
+== resolvers
+
+The `resolvers` component contain different code pieces to help us implement the connectors, you can find more details about connectors in <<connectors.adoc#,connectors documentation>>.
+
+We can find three *Models*
+
+Claim::
+An object structure that contain two arrays one with the resolved value or if not the possible reasons to not resolve like errors.
+
+.Example
+----
+{
+  resolved: ['989345467'],
+  unresolved: []
+}
+----
+
+Unresolved::
+Is a class to identify the reason why a claim has not been filed, there are two value pre-configured `not_found` or `internal_error`
+
+.Example
+----
+const phone_number = new Claim([], [Unresolved.notFound()])
+----
+
+
+ClaimResponse::
+An object containing all the `Claim` object, the key of the object is the claim name.
+
+.Example
+----
+{
+  phone_number: {
+    resolved: ['989345467'],
+    unresolved: []
+  }
+}
+----
+
+Also there are one `Error` exposed called `UnauthorizedError` to be used when any error related with authentication.
+
+And for last the `proxyClaimResolvers` that is a method that accept an array of "resolvers" and will act as a proxy to choose the claims and call different resolvers depending of the claim name, more info about how to use this proxy in <<connectors.adoc#,connectors documentation>>.
+
+[source,js]
+----
+const { resolvers : { proxyClaimResolvers } } = require('iamid')
+const proxy = proxyClaimResolvers([accountsResolver, identifyMeResolver])
+----
+
+
+== utils
+
+Inside `utils` module only the utility `normalizePhoneNumber` is exposed, the idea is to add more utils in the future in this namespace. This util just normalize a phone string to E164 format.
+
+.How to use normalizePhoneNumber?
+[source,js]
+----
+const { utils: { normalizePhoneNumber } } = require('iamid')
+const phone = normalizePhoneNumber.normalize('636656767')
+----

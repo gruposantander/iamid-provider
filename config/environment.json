@@ -1,0 +1,7 @@
+{
+  "pid_whitelist": {
+    "enabled": true,
+    "salt": "banana",
+    "list": ["84e658cf26917bf442bb7a83174697d28fdd94d70266dc8b79530f85663014a7"]
+  }
+}
