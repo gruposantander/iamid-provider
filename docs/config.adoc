@@ -88,6 +88,7 @@ All data in the OP Server from the request object to the access token are storag
 If you don't want to define a concrete entity you can use `default`, this config will be applied to all entities that are not defined.
 
 Inside the repo config for each entity in this moment there are two types of repository:
+
 * Memory: Is the default implementation when you don't provide a `repositories` configuration but is not a good options for Production environment. Just keep the config empty for this entity as for example `session: { }`
 * MongoDB: Store the entities in a MongoDB collection. The configuration should be as
 
