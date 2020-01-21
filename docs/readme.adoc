@@ -1,8 +1,8 @@
-= IAMID documentation
+= iamid-provider
 :toc:
 :toc-placement!:
 
-IAMID is a NodeJs framework on top of an open source OpenId connect implementation https://github.com/panva/node-oidc-provider[oidc-provider], so this product implement an OAuth 2.0 Authorization Server with OpenID Connect and put in top of that the IAMID profile.
+`iamid-provider` is a NodeJs framework on top of an open source OpenId connect implementation https://github.com/panva/node-oidc-provider[oidc-provider], so this product implement an OAuth 2.0 Authorization Server with OpenID Connect and put in top of that the IAMID profile.
 
 toc::[]
 
@@ -12,7 +12,7 @@ Is a work in progress profile on top of OpenId connect that will allow OPs share
 
 == What are the implemented specs & features?
 
-IAMID is based in https://github.com/panva/node-oidc-provider[oidc-provider] that implement lot of specification (can be consult in the product github) but the goal of this implementation is the IAMID profile so several specficiation/fetaure has been limited or deactivated and another ones added to the implementation, the supported specs/features are:
+`iamid-provider` is based in https://github.com/panva/node-oidc-provider[oidc-provider] that implement lot of specification (can be consult in the product github) but the goal of this implementation is the IAMID profile so several specficiation/fetaure has been limited or deactivated and another ones added to the implementation, the supported specs/features are:
 
 * IAMID Authorization Code flow
 * https://openid.net/specs/openid-connect-discovery-1_0.html[OpenID Connect Discovery 1.0]
@@ -28,7 +28,7 @@ Some other specification can be supported when using the https://github.com/panv
 
 == How to use the library?
 
-IAMID is provided as a library for implement an OP (Openid Provider), so for example using `npm` you can install in your project using:
+`iamid-provider` is provided as a library for implement an OP (Openid Provider), so for example using `npm` you can install in your project using:
 
 [source,bash]
 ----

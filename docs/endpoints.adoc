@@ -1,1 +1,51 @@
-= Endpoint
+= Endpoints
+
+`iamid-provider` code don't contain a default implementation for the interactions endpoints login and consent, the is because this interactions process can contain very different steps depending of the specific requirements of the OP server, so is responsibility of the OP developer to implement this endpoints in the Koa router.
+
+To help development `iamid-provider` provide a class `IAmIdRouter` and service methods to pass information to the `iamid-provider` framework.
+
+== Adding new endpoints to IAmIdRouter
+
+`IAmIdRouter` is an extension of https://github.com/ZijianHe/koa-router[koa-router] so to add new routes is as easy as extending the class and adding routes in the constructor, as an example to add a login and consent endpoint:
+
+[source,js]
+----
+const { IAmIdRouter } = require('iamid-provider')
+
+class CustomRouter extends IAmIdRouter {
+  constructor (app, connector) {
+    super(app, connector)
+
+    const INTERACTION_PATH = app.configuration.routes.interaction
+
+    ... // Omitted concretely implementation
+
+    this
+      .post(INTERACTION_PATH + '/:interactionId/login', login)
+      .post(INTERACTION_PATH + '/:interactionId/consent', consent)
+  }
+}
+----
+
+`login` and `consent` will be a functions that implement the concrete logic related with each process, but could exist more than one endpoint for each process as for example:
+
+[source,js]
+----
+  this
+    .post(INTERACTION_PATH + '/:interactionId/login/step1', login1)
+    .post(INTERACTION_PATH + '/:interactionId/login/step2', login2)
+    .post(INTERACTION_PATH + '/:interactionId/consent', consent)
+----
+
+Is up to the OP developer to implement as many interaction endpoint as needed and synchronize this logic with the OP interface/webapp, as long as this endpoint at the end of each process communicate the result to `iamid-provider` using the services method described in next sections.
+
+== Login endpoint
+
+
+
+.post(INTERACTION_PATH + '/:interactionId/login', login)
+      .post(INTERACTION_PATH + '/:interactionId/consent', consent)
+
+== Consent endpoint
+
+
