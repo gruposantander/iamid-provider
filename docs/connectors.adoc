@@ -1,1 +1,68 @@
 = Connectors
+
+The `iamid-provider` goal is to allow End-User to share personal data in a secure way with RPs, the way to obtain this data about the Users is out of the provider implementation and delegated to developer through the use of what we call "Connectors" (aka resolvers).
+In Other words, to obtain the different claims value `iamid-provider` need one or more connectors to be provided by the OP server developer when initialize the app.
+
+The connector can be implemented by the developer in any way, a real example can be found in the https://uk-gitlab.almuk.santanderuk.corp/verified-id/op-server[Santander-uk project] in the `src/minibank` folder.
+
+== What is a connector?
+
+A connector (also known as resolver) is just a Javascript function objects that accept an `auth` object and an Array of claim names and return a `ClaimResponse` object with the claims values. (In an Async way off course) Also the connector should have a property `claims` that expose an array of claims names that are resolved by this connector.
+
+So a connector must fulfill the next contract:
+[source,javascript]
+----
+async function exampleResolver (auth, names) { <1>
+  // Code comes here
+}
+exampleResolver.claims = ['claim1', 'claim2', 'claim3'] <2>
+----
+<1> Is an `async` function that accept `auth` and `names` params.
+<2> Has a `claims` property that is an array of claim names that are resolved by this connector.
+
+== How to implement a connector?
+
+There is no more requirement in how to implement a Connector, just fulfilling the contract in an async way is ok.
+
+Normally the data from the user will be in a remote API outside the OP server so the developer can create some kind of Rest client to obtain the information, this is the case for https://uk-gitlab.almuk.santanderuk.corp/verified-id/op-server[Santander-uk project ], inside the `src/minibank` folder there exist a `client.js` that implement the connection to the minibank API.
+
+As a basic implementation example of a Connector we can have something like:
+----
+const { resolvers: { Claim, ClaimResponse, Unresolved: { notFound } } } = require('iamid-provider') <1>
+async function exampleResolver (auth, names) {
+  const apiResponse = await client.basicInfo(auth.token.access_token) <2>
+  const { phoneNumber, email } = apiResponse
+  const phoneC = phoneNumber ? new Claim([phoneNumber]) : new Claim([], [notFound()]) <3>
+  const emailC = email ? new Claim([email]) : new Claim([], [notFound()])
+  return new ClaimResponse({ 'phone': phoneC, 'email': emailC }) <4>
+}
+exampleResolver.claims = ['phone', 'email'] <5>
+----
+<1> Import the needed classes from `iamid-provider`
+<2> Call to a client to obtain the user data
+<3> Create a `Claim` object with resolved or not resolved value depending of the api response
+<4> Create a `ClaimResponse` with all the claims resolved or not.
+<5> Expose the claims resolved by our connector.
+
+== User session and credentials
+
+Is out of the scope of the `iamid-provider` how exactly the authentication info for the End-User is obtained, the time to obtain this auth info is in the Login process, in other words in the Login endpoint that should be implemented by the developer, See <<endpoints.adoc#,Implement the interactions endpoints>> for more info. Just to highlight that connectors should use resource owner credential to use the APIS.
+
+To allow connectors persist this session info `iamid-provider` provide a repository, see more in <<Sesion Management>>, but the exactly data that is store inside the `auth` object and how to refresh it's responsibility of the OP developer.
+
+== Using a Proxy
+
+To allow developers to have multiple connectors for resolve different claims without create a mess `iamid-provider` offer a `proxyClaimResolvers` that allow you create different connectors and merge all togethers to provide a unique instance to the library. As an example:
+
+[source,js]
+----
+const { resolvers : { proxyClaimResolvers } } = require('iamid-provider') <1>
+const proxy = proxyClaimResolvers([accountsResolver, identifyMeResolver]) <2>
+----
+<1> Import the `proxyClaimResolvers` from `iamid-provider`
+<2> CReate a unique connector that will resolve the claims resolved by `accountsResolver` and `identifyMeResolver`.
+
+This allow the developer to have connectors in different js file, by functionality, domain... and just merge all togethers before initialize the `iamid` app.
+
+== Sesion Management
+TO BE DEFINED (also name can change...)
