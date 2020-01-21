@@ -1,15 +1,17 @@
 = Configuration
 
-The `IamId` framework need several configuration to work, as is based on https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] need some configuration for this framework but most of this config is already fixed in the `IamId` implementation so even if is passed will be rewritten.
+The `IamId-provider` framework need several configuration to work, because is based on https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] need some configuration for this framework, most of config values are already fixed in the `IamId-provider` implementation because the IAMID profile has restrictive requirements and https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] implement lot of OIDC flavors. This fixed config even if is provided by the developer will be overwritten, have a look to the <<'Fixed configuration'>> section for more info about this.
+The rest of the values should be provided by the developer on startup.
 
-The first thing to highlight is that configuration is split in two types, and at the time to create the `IamId` instance should be pass as different values in the constructor (you can see the examples in <<library.adoc#,API docs>>). This differentiation have a reason let us see each both types:
+The first thing to highlight is that configuration is split in two types, and at the time to create the `IamId` instance should be pass as different parameters in the constructor (you can see the examples in <<library.adoc#,API docs>>).
+
+This differentiation have a reason let us see each both types:
 
 environment::
 A JSON object containing the non sensitive data related with configuration, normally this will be stores in a config server, configmap... in the different environments.
 
 secrets::
 A JSON object containing the sensitive information needed for the server, normally this information will be stored in a more secure way as kubernetes secrets, some kind of vault... in the different environments.
-
 
 == Environment configuration
 
@@ -22,10 +24,10 @@ claims::
 An object containing the exposed claims by this OP, following the format described in https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider configuration claims]
 
 routes::
-An object containing the names of the routes that are exposed by the OP, the routes that can be configured can be see in link:../lib/configuration/default-environment.js[default-environment.js], default values are the recommended nes but can be customized if there are a good reason.
+An object containing the names of the routes that are exposed by the OP, the different routes that can be configured are listed in file link:../lib/configuration/default-environment.js[default-environment.js], default values are the recommended ones but can be customized if there are a good reason.
 
 pushedRequestURN::
-A urn prefix for generate the request_uri` in the 'initiate-authorize' endpoint, should follow a format as for example `urn:op.example:`, see https://tools.ietf.org/html/rfc8141[URN specification] for more info.
+A urn prefix for generate the `request_uri` in the 'initiate-authorize' endpoint, should follow a URN format as for example `urn:op.example:`, see https://tools.ietf.org/html/rfc8141[URN specification] for more info.
 
 issuer::
 The URI of the OP that will be used as `aud` claim in JWT tokens, security...
@@ -41,6 +43,15 @@ The authorization endpoint showed in the '/.well-known/openid-configuration' end
 
 ttl::
 Expirations for all token types, as described in https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#ttl[oidc-provider documentation]
+
+whitelistedJWA::
+This is also a configuration from https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#whitelistedjwa[oidc-provider] and declare the supported algorithms for each operation.
+
+clockTolerance::
+Also from https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#clocktolerance[oidc-provider] this value is a Number value (in seconds) describing the allowed system clock skew for validating client-provided JWTs, e.g. Deafult value is `5` seconds.
+
+discovery::
+
 
 == Secret configuration
 
@@ -93,20 +104,6 @@ repositories::
     given_name: { type: 'fill', args: { begin: 2, end: -2, filling: '****' } },
     family_name: { type: 'fill', args: { begin: 2, end: -2, filling: '****' } }
   },
-  ttl: {
-    AccessToken: 1,
-    AuthorizationCode: 120,
-    ClientCredentials: 1,
-    DeviceCode: 1,
-    IdToken: 600
-  },
-  whitelistedJWA: {
-    tokenEndpointAuthSigningAlgValues: ['RS256'],
-    idTokenSigningAlgValues: ['RS256'],
-    requestObjectSigningAlgValues: ['RS256'],
-    userinfoSigningAlgValues: ['RS256']
-  },
-  clockTolerance: 5
 }
 
 
