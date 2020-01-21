@@ -27,7 +27,7 @@ class CustomRouter extends IAmIdRouter {
 }
 ----
 
-`login` and `consent` will be a functions that implement the concrete logic related with each process, but could exist more than one endpoint for each process as for example:
+`login` and `consent` will be functions that implement the concrete logic related with each process, but could exist more than one endpoint for each process, for example:
 
 [source,js]
 ----
@@ -37,15 +37,83 @@ class CustomRouter extends IAmIdRouter {
     .post(INTERACTION_PATH + '/:interactionId/consent', consent)
 ----
 
-Is up to the OP developer to implement as many interaction endpoint as needed and synchronize this logic with the OP interface/webapp, as long as this endpoint at the end of each process communicate the result to `iamid-provider` using the services method described in next sections.
+Is up to the OP developer to implement as many interaction endpoint as needed and synchronize this logic with the OP interface/webapp, as long as this endpoints at the end of each process communicate the result to `iamid-provider` using the services method described in next sections.
 
 == Login endpoint
 
+In this endpoints (or endpoints) the OP server should provide to the user the way to authenticate into the system, usually this will be a remote system and this endpoint should acts as a proxy for execute some type of oauth flow or a direct call to some login service outside the OP server.
 
+To execute the login logic a client or connector can be used to authenticate the user against an external API and store the authentication data in the Session Manager as described in <<connectors.adoc#,Implement the connectors>> documentation.
 
-.post(INTERACTION_PATH + '/:interactionId/login', login)
-      .post(INTERACTION_PATH + '/:interactionId/consent', consent)
+Also task related with validate user input should be implement in this endpoint.
+
+After all the custom logic and the End User successful login into the system and authentication data is stored in Session Manager the endpoint should call to the service method `processLogin (userId, ctx, next)` to communicate `iamid-provider` that login has finished, this will make the authorization process progress to the next prompt. As you can see the koa Context `ctx` and `next` callback are passed to the method because from this point the `IAmIdRouter` will take the control so the call to the `processLogin` method should be the last statement of our login logic.
+
+An example of a login endpoint implementation can be found in this repository in link:../test/fixtures/reference-interaction-router.js[reference-interaction-router.js] file inside the `login` method.
+
+After call to this method `iamid-provider` will create a session for this user (this means cookies) and user should not login again if try to make another authorization process in less than 15 minutes (or the configured value for the cookies duration). The `userId` value passed to this method should be an unique user identifier that will be stored in the session and also used for obtain the claims value (used to obtain the auth data from session manager).
 
 == Consent endpoint
 
+In this endpoints (or endpoints) the OP server should show clearly to the End User the list of all the claims, scopes and assertions that are being asked by the RP, the OP should ask explicitly to the user for the permission to share this information. After all the process has finished the endpoint should call to the service method `processConsent (consentData, ctx, next)` to communicate to `iamid-provider` that consent process has finished, this will make the authorization process progress to the next prompt.
 
+Again as you can see the koa Context `ctx` and `next` callback are passed to the method because from this point the `IAmIdRouter` will take the control so the call to the `processConsent` method should be the last statement of our custom consent logic.
+
+The parameter `consentData` is a JSON object with the next structure:
+
+----
+{
+  "id_token": {
+    "claims": {
+        "claim_name": 0
+    },
+    "assertions": {
+        "claim_name": 0
+    }
+  },
+  "userinfo": {
+    // same
+  },
+  "approved_scopes": ["scope_name"]
+}
+----
+
+At root level we can have `id_token` or `userinfo` depending of which section have been request by the RP, inside this two object the structure is exactly the same, can exist a `claims` and `assertions`, the first is related with an RP requesting the value of the claim and the second category is for assertion about a claim.
+`claims` and `assertions` are object that contain entries which key is a claim name as for example `given_name` and the value is a index of the consented value.
+
+So to indicate accepted claims/assertions the name of the assertion/claim should appear in the object with an existing index. To no accept a claims/assertion the name of the claim/assertion can appear in the object with index -1 or not appear at all.
+
+All this fields are optionals and depend of the RP first request, should be obtained by the OP interface using the `/interaction/:interactionId` endpoint.
+
+Also at root level we can find `approved_scopes` field that is an array of scopes names that are approved by the End-User, the 'openid' scope is mandatory for any kind of claim request and should be sent just with any consent of the end user.
+
+Let us see clearly with an example:
+
+----
+{
+  "id_token": {
+    "claims": {
+        "given_name": 0,
+        "total_balance": -1,
+    },
+    "assertions": {
+        "given_name": 0
+    }
+  },
+  "userinfo": {
+    "claims": {
+        "family_name": 0
+    }
+  },
+  "approved_scopes": ["openid"]
+}
+----
+
+In the previous example:
+
+* Claims 'given_name' and 'family_name' has been accepted.
+* Claim 'total_balance' has been not accepted because have a index of -1.
+* Assertion 'given_name' has been accepted.
+* Assertion 'family_name' has been not accepted because is missing from the object.
+
+There are a special case related with the "assertions", in the `/interaction/:interaction_id` endpoint response the "result" field of the assertion claims only contain the values that match the assertion evaluation, this means that this result can be an empty array and even in this case the user can accept to share this assertion result (a false value), for this reason when indicates the index to an assertion claim the rules is a little different, a -1 means not share and a index >= 0 means to accept, even if the array has no values (is empty) or a index is out of bound.
