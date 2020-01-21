@@ -1,0 +1,62 @@
+= Claim Mask
+
+
+== Claims Mask
+
+{
+  masks: {
+    email: { type: 'email' },
+    phone_number: { type: 'slice', args: { prefix: '******', begin: -4 } },
+    given_name: { type: 'fill', args: { begin: 2, end: -2, filling: '****' } },
+    family_name: { type: 'fill', args: { begin: 2, end: -2, filling: '****' } }
+  },
+}
+
+
+== Claims Mask
+
+OP Server allow to setup by configuration a mask logic to be applied to the claims returned to the End-User in the interaction process, this feature avoid the disclosure of sensitive information in the authorization process.
+
+As described in the <<Configuration>> section the mask config is provided as a object containing as key the claim name and as value another object describing the mask to be applied to the claim.
+
+The mask object contain the next fields:
+
+- type: The identifier of the mask implementation as 'email', 'slice' or 'fill'
+- args: An object that contain the different parameters needed to apply the mask.
+
+The available mask types are:
+
+=== email
+This mask only show the first and last character before the @ char and put four * characters, for example the mail value 'custard.apple@santander.co.uk' is masked as 'c****e@santander.co.uk'
+
+A configuration example for claims "email" and "second_email" will be:
+[source,json]
+----
+mask : {
+  email: { type: 'email' },
+  second_email: { type: 'email' }
+}
+----
+
+===  slice
+This mask perform an slice operation of the claim as described in https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/slice[Javascript Docs]. Accept the parameters `begin`, `end`, `prefix` and `suffix`, for example the phone_number value '1234567890' could be masked as `******7890` with a prefix `******` and begin `-4`
+
+A configuration example to only show the last 5 characters in 'phone_number' claim is:
+[source,json]
+----
+mask : {
+  phone_number: { type: 'slice', args: { prefix: '******', begin: -5 } }
+}
+----
+
+=== fill
+This mask fill with * chars a position inside the claim, Accept the parameters `begin`, `end` and `filling`, for example the family_name 'Ramirez Oliva' can be masked to show just the last and first two characters as 'Ra****va' using begin=2, end=-1 and filling `****`
+
+A configuration example to only show the first and last two characters in 'given_name' and 'family_name' claims is:
+[source,json]
+----
+mask : {
+  given_name: { type: 'fill', args: { begin: 2, end: -2, filling: '****' } },
+  family_name: { type: 'fill', args: { begin: 2, end: -2, filling: '****' } }
+}
+----

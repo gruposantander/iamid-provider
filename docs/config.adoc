@@ -1,7 +1,6 @@
 = Configuration
 
-The `IamId-provider` framework need several configuration to work, because is based on https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] need some configuration for this framework, most of config values are already fixed in the `IamId-provider` implementation because the IAMID profile has restrictive requirements and https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] implement lot of OIDC flavors. This fixed config even if is provided by the developer will be overwritten, have a look to the <<'Fixed configuration'>> section for more info about this.
-The rest of the values should be provided by the developer on startup.
+The `IamId-provider` framework need several configuration to work, because is based on https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] need some configuration for this framework, most of config values are already fixed in the `IamId-provider` please see <<'Fixed configuration'>> section for more info, the rest of the values should be provided by the developer on startup.
 
 The first thing to highlight is that configuration is split in two types, and at the time to create the `IamId` instance should be pass as different parameters in the constructor (you can see the examples in <<library.adoc#,API docs>>).
 
@@ -33,7 +32,7 @@ issuer::
 The URI of the OP that will be used as `aud` claim in JWT tokens, security...
 
 masks::
-An object containing the claims mask definition. See section <<Claims Mask>> for more info.
+An object containing the claims mask definition. See page <<claimmask.adoc#,Claims Mask>> for more info about this feature.
 
 postLogoutRedirectURI::
 The url where End-User will be redirect after a /logout request.
@@ -109,68 +108,16 @@ By last to define the indexes for the repo collections in mongo you just need to
 
 == Fixed configuration
 
-
+Some of the configuration that is provided by the https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] that this library use as base is fixed purposely because the IAMID profile has restrictive requirements and https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] implement lot of OIDC flavors. This fixed config even if is provided by the developer will be overwritten, have look to the file link:../lib/configuration/fixed.js[fixed.js] to know this values.
 
 == How to provide the configuration?
 
+The way to store, manage and obtain the configuration is out of the scope of this library, you can choose to use a config-map, kubernetes secret, environment variables, a spring config server... but once obtained in your code you need to provide both config objects `secrets` and `environments` when creating the `IAmId` app as follow:
 
-
-== Claims Mask
-
-{
-  masks: {
-    email: { type: 'email' },
-    phone_number: { type: 'slice', args: { prefix: '******', begin: -4 } },
-    given_name: { type: 'fill', args: { begin: 2, end: -2, filling: '****' } },
-    family_name: { type: 'fill', args: { begin: 2, end: -2, filling: '****' } }
-  },
-}
-
-
-== Claims Mask
-
-OP Server allow to setup by configuration a mask logic to be applied to the claims returned to the End-User in the interaction process, this feature avoid the disclosure of sensitive information in the authorization process.
-
-As described in the <<Configuration>> section the mask config is provided as a object containing as key the claim name and as value another object describing the mask to be applied to the claim.
-
-The mask object contain the next fields:
-
-- type: The identifier of the mask implementation as 'email', 'slice' or 'fill'
-- args: An object that contain the different parameters needed to apply the mask.
-
-The available mask types are:
-
-=== email
-This mask only show the first and last character before the @ char and put four * characters, for example the mail value 'custard.apple@santander.co.uk' is masked as 'c****e@santander.co.uk'
-
-A configuration example for claims "email" and "second_email" will be:
-[source,json]
 ----
-mask : {
-  email: { type: 'email' },
-  second_email: { type: 'email' }
-}
+const { IAmId } = require('iamid-provider')
+const app = new IAmId(environment, secrets)
 ----
 
-===  slice
-This mask perform an slice operation of the claim as described in https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/slice[Javascript Docs]. Accept the parameters `begin`, `end`, `prefix` and `suffix`, for example the phone_number value '1234567890' could be masked as `******7890` with a prefix `******` and begin `-4`
+To know more in deep about how to initialize the server you can read docs on <<server.adoc#,Putting all together and starting the server>>
 
-A configuration example to only show the last 5 characters in 'phone_number' claim is:
-[source,json]
-----
-mask : {
-  phone_number: { type: 'slice', args: { prefix: '******', begin: -5 } }
-}
-----
-
-=== fill
-This mask fill with * chars a position inside the claim, Accept the parameters `begin`, `end` and `filling`, for example the family_name 'Ramirez Oliva' can be masked to show just the last and first two characters as 'Ra****va' using begin=2, end=-1 and filling `****`
-
-A configuration example to only show the first and last two characters in 'given_name' and 'family_name' claims is:
-[source,json]
-----
-mask : {
-  given_name: { type: 'fill', args: { begin: 2, end: -2, filling: '****' } },
-  family_name: { type: 'fill', args: { begin: 2, end: -2, filling: '****' } }
-}
-----
