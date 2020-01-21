@@ -73,44 +73,49 @@ pairwiseSalt::
 A secret text to be used as a salt for calculate the pairwise user identifier as described in https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg[oidc Section 8.1.]
 
 cookies::
-The cookies configurtaion for the server, as described in https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#cookies[oidc-provider configuration cookies]
-
-This file is intentionally separated from the config so you can store in a more secure way like in a Kubernetes secret, vault solution...
+The cookies configuration for the OP server, afull description of this config can be found on https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#cookies[oidc-provider configuration cookies]
 
 repositories::
-
-
-module.exports = {
-  cookies: {
-    keys: ['some-key'],
-    long: {
-      httpOnly: true,
-      maxAge: 15 * 60 * 1000, // 15 minutes
-      // sameSite: true,
-      secure: secureCookies,
-      signed: true
-    },
-    short: {
-      httpOnly: true,
-      maxAge: 10 * 60 * 1000, // 10 minutes
-      // sameSite: true,
-      secure: secureCookies,
-      signed: true
-    }
-  },
-  pairwiseSalt: 'op-server'
+All data in the OP Server from the request object to the access token are storage in a repository in a temporal way (everything expire), for this the iamid-provider uses a repository pattern, to setup this configuration the `repositories` config field is a JSON object that contain one entry for each entity as for example:
+----
+{
+  'session': { ... },
+  'access_token': { ... },
+  'consents': { ... },
+  'default': { ... }
+  ...
 }
+----
+If you don't want to define a concrete entity you can use `default`, this config will be applied to all entities that are not defined.
+
+Inside the repo config for each entity in this moment there are two types of repository:
+* Memory: Is the default implementation when you don't provide a `repositories` configuration but is not a good options for Production environment. Just keep the config empty for this entity as for example `session: { }`
+* MongoDB: Store the entities in a MongoDB collection. The configuration should be as
+
+----
+{
+  { 'default': { type: 'mongodb', 'options': { 'uri': 'mongodb://[username:password@]host1[:port1][,...hostN[:portN]][/[database][?options]]' } } }
+}
+----
+
+The `uri` parameter is a mongo connection string, you can read more about this in official MongoDb documentation https://docs.mongodb.com/manual/reference/connection-string/[here]
+
+By last to define the indexes for the repo collections in mongo you just need to at as `repository` config top root level one entry with the key being the name of the entity plus `-mongodb-indexes` and the value an array of MongoDB index values. For example:
+----
+  'session-mongodb-indexes': [
+    { key: { uid: 1 }, unique: true }
+  ]
+----
 
 == Fixed configuration
 
 
 
-== Claims Mask
-
-
 == How to provide the configuration?
 
 
+
+== Claims Mask
 
 {
   masks: {
