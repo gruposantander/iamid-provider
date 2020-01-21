@@ -51,21 +51,55 @@ clockTolerance::
 Also from https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#clocktolerance[oidc-provider] this value is a Number value (in seconds) describing the allowed system clock skew for validating client-provided JWTs, e.g. Deafult value is `5` seconds.
 
 discovery::
+Is a JSON object that provide additional information in the discovery document (`.well-known` endpoint), for implement the IAMID profile some values should be defined here:
+* assertion_claims_supported: A boolean that indicates if the OP support `assertion_claims`.
+* digital_id_certified_data_extension: A boolean value that indicate if this OP support the IAMID profile.
+* claims_in_assertion_claims_supported: An object describing what of the exposed claims support assertions, also provide the type of the claim. The key inside the object is the name of the claim, so for exmaple `birthdate: { type: 'date' }` means that `birthdate` claim is of type `date`.
+* assertion_claims_query_language_supported: An Object that contain as keys the name of the claim type and as values an array with all the operators that this type support. For example `string: ['$eq']` means that claims of type string support the `$eq` operator.
 
+See complete example in file link:../lib/configuration/default-environment.js[default-environment.js]
 
 == Secret configuration
 
-This file contain values that are supposed to be 'secrets' (confidential) like keys, passwords... there are two main sections:
+The next keys are allowed into the environment configuration JSON, the default values for each config can be found in link:../lib/configuration/default-secret.js[default-secret.js]
 
-clients:: An array of static client configuration as defined in https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#clients[oidc-provider configuration client].
-jwks:: A Json Web Key Set that contain the keys that will be used by the OP for sign and encrypt.
-pairwiseSalt:: A secret text to be used as a salt for calculate the pairwise user identifier as described in https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg[oidc Section 8.1.]
-cookies:: The cookies configurtaion for the server, as described in https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#cookies[oidc-provider configuration cookies]
+clients::
+An array of static clients definition (RP), the configuration description can be found on https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#clients[oidc-provider configuration client] an important thing to highlight is that in the IAMID profile all clients must use `private_key_jwt` as authentication so all params related with that should be correctly setup (`token_endpoint_auth_method`, `token_endpoint_auth_signing_alg`, `jwks`, ...)
+
+jwks::
+A Json Web Key Set that contain the keys that will be used by the OP for sign and encrypt. The object must be in https://tools.ietf.org/html/rfc7517#section-5[JWK Set format] and all provided keys must be private keys. PLease refer to https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#jwks[oidc-provider jwks] for more info about supported key types and more.
+
+pairwiseSalt::
+A secret text to be used as a salt for calculate the pairwise user identifier as described in https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg[oidc Section 8.1.]
+
+cookies::
+The cookies configurtaion for the server, as described in https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#cookies[oidc-provider configuration cookies]
 
 This file is intentionally separated from the config so you can store in a more secure way like in a Kubernetes secret, vault solution...
 
 repositories::
 
+
+module.exports = {
+  cookies: {
+    keys: ['some-key'],
+    long: {
+      httpOnly: true,
+      maxAge: 15 * 60 * 1000, // 15 minutes
+      // sameSite: true,
+      secure: secureCookies,
+      signed: true
+    },
+    short: {
+      httpOnly: true,
+      maxAge: 10 * 60 * 1000, // 10 minutes
+      // sameSite: true,
+      secure: secureCookies,
+      signed: true
+    }
+  },
+  pairwiseSalt: 'op-server'
+}
 
 == Fixed configuration
 
@@ -79,25 +113,6 @@ repositories::
 
 
 {
-  discovery: {
-    assertion_claims_supported: true,
-    digital_id_certified_data_extension: true,
-    claims_in_assertion_claims_supported: {
-      total_balance: { type: 'object', properties: { amount: { type: 'decimal' }, currency: { type: 'string' } } },
-      phone_number: { type: 'phone_number' },
-      email: { type: 'string' },
-      birthdate: { type: 'date' },
-      family_name: { type: 'string' },
-      given_name: { type: 'string' }
-    },
-    assertion_claims_query_language_supported: {
-      string: ['$eq'],
-      phone_number: ['$eq'],
-      date: ['$eq', '$gt', '$lt', '$gte', '$lte'],
-      decimal: ['$eq', '$gt', '$lt', '$gte', '$lte'],
-      object: []
-    }
-  },
   masks: {
     email: { type: 'email' },
     phone_number: { type: 'slice', args: { prefix: '******', begin: -4 } },

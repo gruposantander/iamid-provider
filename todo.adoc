@@ -24,6 +24,7 @@
 * Review Jenkins files
 
 == Docs
+* Remove log config and move config to test folder is possible?
 * Should we describe events emitted or we wait for the implementation of functional events and this things??
 * In IamIdRouter in library api we should also add the HTTPError description
 * look ofr IamId and replace with iamid-provider

@@ -174,8 +174,8 @@ const suite = function () {
 }
 
 module.exports = function () {
-  const secrets = require('../../config/secrets')
-  const environment = require('../../config/environment')
+  const secrets = require('../config/secrets')
+  const environment = require('../config/environment')
   const configs = [{
     name: 'Memory',
     setup: function () {
