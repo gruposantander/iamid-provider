@@ -28,3 +28,6 @@
 * In IamIdRouter in library api we should also add the HTTPError description
 * look ofr IamId and replace with iamid-provider
 * In endpoint doc in == Login endpoint probably the contract change a lot after acr and more features.
+* Add Session manager dcoumentation.
+* In connnectors describe more about resolved or not resolved and the arrays.
+
