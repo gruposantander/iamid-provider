@@ -153,7 +153,7 @@ const suite = function () {
 
   afterEach('clean consent repository', async function () {
     // TODO this is not going to be needed when every consent has its own id
-    (await this.app.repositories.getRepository('consents')).clear()
+    (await this.app.repositories.getRepository('Consents')).clear()
   })
 
   describe('Wellknown Endpoints', require('./well-known-endpoints.spec'))
@@ -171,6 +171,7 @@ const suite = function () {
   describe('Abort Endpoint', require('./abort-endpoint.spec'))
   describe('Assertion Claims', require('./assertion-claims.spec'))
   describe('Repositories', require('./repositories.spec'))
+  describe('Authorization Adapter', require('./auth-adapter.spec'))
 }
 
 module.exports = function () {
