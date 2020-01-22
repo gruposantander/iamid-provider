@@ -61,10 +61,14 @@ module.exports = function () {
       const authData = await this.authAdapter.get(id, SYSTEM_ID)
       deepStrictEqual(authData, AUTH_DATA)
     })
-    it.skip('should not create a new user if already exist', async function () {
+    it('should not create a new user if already exist', async function () {
       const id = await this.authAdapter.save(SYSTEM_ID, USER_ID, AUTH_DATA)
-      const id2 = await this.authAdapter.save(SYSTEM_ID, USER_ID, { token: 'newToken' })
+      const id2 = await this.authAdapter.save(SYSTEM_ID, USER_ID, AUTH_DATA)
       equal(id, id2)
+    })
+    it('should not overwrite auth if already exist', async function () {
+      const id = await this.authAdapter.save(SYSTEM_ID, USER_ID, AUTH_DATA)
+      await this.authAdapter.save(SYSTEM_ID, USER_ID, { token: 'newToken' })
       const authData = await this.authAdapter.get(id, SYSTEM_ID)
       deepStrictEqual(authData, { token: 'newToken' })
     })
