@@ -1,6 +1,6 @@
 'use strict'
 
-const { describe, it, before } = require('mocha')
+const { describe, it, before, afterEach } = require('mocha')
 const { Authorization, SystemAuth, AuthAdapter } = require('../../lib/auth-adapter.js')
 const { ok, equal, deepStrictEqual } = require('assert').strict
 
@@ -71,6 +71,9 @@ module.exports = function () {
       await this.authAdapter.save(SYSTEM_ID, USER_ID, { token: 'newToken' })
       const authData = await this.authAdapter.get(id, SYSTEM_ID)
       deepStrictEqual(authData, { token: 'newToken' })
+    })
+    afterEach('clean consent repository', async function () {
+      (await this.app.repositories.getRepository(AuthAdapter.getRepoName())).clear()
     })
   })
 }
