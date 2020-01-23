@@ -1,7 +1,7 @@
 'use strict'
 
 const { describe, it, before, afterEach } = require('mocha')
-const { Authorization, SystemAuth, AuthAdapter } = require('../../lib/auth-adapter.js')
+const { Authorization, SystemAuth, UserAuthorizations } = require('../../lib/user-authorizations.js')
 const { ok, equal, deepStrictEqual } = require('assert').strict
 
 module.exports = function () {
@@ -52,9 +52,9 @@ module.exports = function () {
       equal(system, null)
     })
   })
-  describe('AuthAdapter', function () {
+  describe('UserAuthorizations', function () {
     before('Setup Adapter', function () {
-      this.authAdapter = new AuthAdapter(this.app.repositories)
+      this.authAdapter = new UserAuthorizations(this.app.repositories)
     })
     it('should save and retrieve from adapter correctly', async function () {
       const id = await this.authAdapter.save(SYSTEM_ID, USER_ID, AUTH_DATA)
@@ -66,14 +66,14 @@ module.exports = function () {
       const id2 = await this.authAdapter.save(SYSTEM_ID, USER_ID, AUTH_DATA)
       equal(id, id2)
     })
-    it('should not overwrite auth if already exist', async function () {
+    it('should overwrite auth if already exist the user', async function () {
       const id = await this.authAdapter.save(SYSTEM_ID, USER_ID, AUTH_DATA)
       await this.authAdapter.save(SYSTEM_ID, USER_ID, { token: 'newToken' })
       const authData = await this.authAdapter.get(id, SYSTEM_ID)
       deepStrictEqual(authData, { token: 'newToken' })
     })
     afterEach('clean consent repository', async function () {
-      (await this.app.repositories.getRepository(AuthAdapter.getRepoName())).clear()
+      (await this.app.repositories.getRepository(UserAuthorizations.getRepoName())).clear()
     })
   })
 }
