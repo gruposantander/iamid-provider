@@ -170,8 +170,8 @@ const suite = function () {
   describe('Logout Endpoint', require('./logout-endpoint.spec'))
   describe('Abort Endpoint', require('./abort-endpoint.spec'))
   describe('Assertion Claims', require('./assertion-claims.spec'))
-  describe('Repositories', require('./repositories.spec'))
   describe('User Authorizations', require('./user-authorizations.spec'))
+  describe('Repositories', require('./repositories.spec'))
 }
 
 module.exports = function () {
