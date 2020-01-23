@@ -58,7 +58,7 @@ module.exports = function () {
     })
     it('should save and retrieve from adapter correctly', async function () {
       const id = await this.authAdapter.save(SYSTEM_ID, USER_ID, AUTH_DATA)
-      const authData = await this.authAdapter.get(id, SYSTEM_ID)
+      const authData = await this.authAdapter.getAuth(id, SYSTEM_ID)
       deepStrictEqual(authData, AUTH_DATA)
     })
     it('should not create a new user if already exist', async function () {
@@ -69,8 +69,14 @@ module.exports = function () {
     it('should overwrite auth if already exist the user', async function () {
       const id = await this.authAdapter.save(SYSTEM_ID, USER_ID, AUTH_DATA)
       await this.authAdapter.save(SYSTEM_ID, USER_ID, { token: 'newToken' })
-      const authData = await this.authAdapter.get(id, SYSTEM_ID)
+      const authData = await this.authAdapter.getAuth(id, SYSTEM_ID)
       deepStrictEqual(authData, { token: 'newToken' })
+    })
+    it('should contain only one system and not duplicate', async function () {
+      const id = await this.authAdapter.save(SYSTEM_ID, USER_ID, AUTH_DATA)
+      await this.authAdapter.save(SYSTEM_ID, USER_ID, { token: 'newToken' })
+      const authorization = await this.authAdapter.get(id)
+      equal(authorization.systems.length, 1)
     })
     afterEach('clean consent repository', async function () {
       (await this.app.repositories.getRepository(UserAuthorizations.getRepoName())).clear()
