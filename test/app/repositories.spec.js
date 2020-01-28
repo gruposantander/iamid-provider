@@ -2,12 +2,12 @@
 
 const { it } = require('mocha')
 const { deepEqual } = require('assert').strict
-const { UserAuthorizations } = require('../../lib/user-authorizations')
+const { Users } = require('../..')
 const indexConfig = require('../../lib/configuration/default-repositories')
 
 module.exports = function () {
   const collections = ['AccessToken', 'AuthorizationCode', 'Interaction', 'PushedAuthorizationRequest', 'ReplayDetection',
-    'Session', 'consents', UserAuthorizations.getRepoName()]
+    'Session', 'consents', Users.getRepoName()]
   collections.forEach((name) => {
     it('should create indexes correctly ' + name, async function () {
       if (this.mongo) {
