@@ -1,6 +1,6 @@
 {
   "name": "iamid-provider",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "OpenID, OAuth 2.0 and IAMID Authorization Server implementation for Node.js",
   "main": "index.js",
   "scripts": {
