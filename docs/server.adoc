@@ -4,7 +4,7 @@ After setup our <<config.adoc#,config>>, create the <<connectors.adoc#,connector
 
 .OpServer.js
 ----
-const { IAmId } = require('iamid-provider') <1>
+const { IAmId } = require('@santander/iamid-provider') <1>
 const InteractionRouter = require('./interaction-router')
 const MyConnector = require('./connector')
 

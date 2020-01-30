@@ -10,7 +10,7 @@ To help development `iamid-provider` provide a class `IAmIdRouter` and service m
 
 [source,js]
 ----
-const { IAmIdRouter } = require('iamid-provider')
+const { IAmIdRouter } = require('@santander/iamid-provider')
 
 class CustomRouter extends IAmIdRouter {
   constructor (app, connector) {
@@ -43,15 +43,15 @@ Is up to the OP developer to implement as many interaction endpoint as needed an
 
 In this endpoints (or endpoints) the OP server should provide to the user the way to authenticate into the system, usually this will be a remote system and this endpoint should acts as a proxy for execute some type of oauth flow or a direct call to some login service outside the OP server.
 
-To execute the login logic a client or connector can be used to authenticate the user against an external API and store the authentication data in the Session Manager as described in <<connectors.adoc#,Implement the connectors>> documentation.
+To execute the login logic a client or connector can be used to authenticate the user against an external API and store the authorization data using the `Users` repository as described in <<usermanagment.adoc#,User authorization data management>> documentation.
 
 Also task related with validate user input should be implement in this endpoint.
 
-After all the custom logic and the End User successful login into the system and authentication data is stored in Session Manager the endpoint should call to the service method `processLogin (userId, ctx, next)` to communicate `iamid-provider` that login has finished, this will make the authorization process progress to the next prompt. As you can see the koa Context `ctx` and `next` callback are passed to the method because from this point the `IAmIdRouter` will take the control so the call to the `processLogin` method should be the last statement of our login logic.
+After all the custom logic and the End User successful login into the system and authentication data is stored in `Users` repository the endpoint should call to the service method `processLogin (userId, ctx, next)` to communicate `iamid-provider` that login has finished, this will make the authorization process progress to the next prompt. As you can see the koa Context `ctx` and `next` callback are passed to the method because from this point the `IAmIdRouter` will take the control so the call to the `processLogin` method should be the last statement of our login logic.
 
 An example of a login endpoint implementation can be found in this repository in link:../test/fixtures/reference-interaction-router.js[reference-interaction-router.js] file inside the `login` method.
 
-After call to this method `iamid-provider` will create a session for this user (this means cookies) and user should not login again if try to make another authorization process in less than 15 minutes (or the configured value for the cookies duration). The `userId` value passed to this method should be an unique user identifier that will be stored in the session and also used for obtain the claims value (used to obtain the auth data from session manager).
+After call to this method `iamid-provider` will create a session for this user (this means cookies) and user should not login again if try to make another authorization process in less than 15 minutes (or the configured value for the cookies duration). The `userId` value passed to this method should be an unique user identifier that will be stored in the session and also used for obtain the claims value (used to obtain the auth data from `Users` repo).
 
 == Consent endpoint
 

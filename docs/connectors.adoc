@@ -28,7 +28,7 @@ Normally the data from the user will be in a remote API outside the OP server so
 
 As a basic implementation example of a Connector we can have something like:
 ----
-const { resolvers: { Claim, ClaimResponse, Unresolved: { notFound } } } = require('iamid-provider') <1>
+const { resolvers: { Claim, ClaimResponse, Unresolved: { notFound } } } = require('@santander/iamid-provider') <1>
 async function exampleResolver (auth, names) {
   const apiResponse = await client.basicInfo(auth.token.access_token) <2>
   const { phoneNumber, email } = apiResponse
@@ -48,7 +48,7 @@ exampleResolver.claims = ['phone', 'email'] <5>
 
 Is out of the scope of the `iamid-provider` how exactly the authentication info for the End-User is obtained, the time to obtain this auth info is in the Login process, in other words in the Login endpoint that should be implemented by the developer, See <<endpoints.adoc#,Implement the interactions endpoints>> for more info. Just to highlight that connectors should use resource owner credential to use the APIS.
 
-To allow connectors persist this session info `iamid-provider` provide a repository, see more in <<Sesion Management>>, but the exactly data that is store inside the `auth` object and how to refresh it's responsibility of the OP developer.
+To allow connectors persist this session info `iamid-provider` provide a repository, see more in <<usermanagment.adoc#,User authorization data management>>, but the exactly data that is store inside the `auth` object and how to refresh it's responsibility of the OP developer.
 
 == Using a Proxy
 
@@ -56,7 +56,7 @@ To allow developers to have multiple connectors for resolve different claims wit
 
 [source,js]
 ----
-const { resolvers : { proxyClaimResolvers } } = require('iamid-provider') <1>
+const { resolvers : { proxyClaimResolvers } } = require('@santander/iamid-provider') <1>
 const proxy = proxyClaimResolvers([accountsResolver, identifyMeResolver]) <2>
 ----
 <1> Import the `proxyClaimResolvers` from `iamid-provider`

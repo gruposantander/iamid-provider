@@ -116,7 +116,7 @@ Some of the configuration that is provided by the https://github.com/panva/node-
 The way to store, manage and obtain the configuration is out of the scope of this library, you can choose to use a config-map, kubernetes secret, environment variables, a spring config server... but once obtained in your code you need to provide both config objects `secrets` and `environments` when creating the `IAmId` app as follow:
 
 ----
-const { IAmId } = require('iamid-provider')
+const { IAmId } = require('@santander/iamid-provider')
 const app = new IAmId(environment, secrets)
 ----
 
