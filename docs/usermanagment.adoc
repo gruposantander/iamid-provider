@@ -1,0 +1,64 @@
+= User authorization data management
+
+Inside the *Connectors* one of the main task is to _obtain_, _store_ and _use_ the User authorization data, the part about _store_ is resolved by the framework providing a `Users` repository to store the authorization data related with an user in the different external systems that are supported by the OP.
+
+When we talk about User authorization data we mean the information needed to get the claims data from the external APIs, for example if we are using Oauth to connect with external APIs then we are talking about `access_token` and `refresh_token`.
+
+== How to use `Users` repo
+
+The `Users` class is an adapter of a normal repository that add additional logic related with the user management like for example generate a new user in OP server if is the first login and manage the logic of the relation between `User` and `Connections` objects (will be defined later)
+
+=== Initialize `Users` repo
+
+To work with `Users` we need an initialize instance of the `repositories` factory, and to create an instance just:
+
+----
+
+const usersRepo = new Users(repositories)
+----
+
+We can now use the `userRepo` to store or obtain the user authorization data, the relation between an user, a "system" and the data needed to authorize request into the API is what we call `Connection`
+
+=== Initialize `Connection` instance
+
+To create a connection is as easy as:
+
+----
+const SYSTEM_TYPE = 'minibank'
+const connection = new Connection(SYSTEM_TYPE, userId, authData)
+----
+
+Let us review the code in deep:
+
+- The `SYSTEM_TYPE` constant is a string that identify the system, what is more or less the external API or what is the same the *Connector*, because each connector is meant to implement a single external system. This is normal a constant because the connector should use the same value when storing and retrieving data for all the users.
+- The `userId` is a unique user identifier in the external system, is not the same as the OP server `uid` that is a term that we will review later. The same End-User will have different user ids for each `Connection`.
+- An at last the variable `authData` is a free format Object that contain all needed information to use against the external system APIs and authorize the request. This information should be obtained from an login/authorization API in the login process.
+
+=== Saving the user authorization data
+
+So in the login process the connector should store the User authorization data using the method `insertOrUpdate` as shown next:
+
+----
+const connection = new Connection(SYSTEM_TYPE, auth.sysUid, refreshed)
+const uid = await usersRepo.insertOrUpdate(connection)
+----
+
+This method will look for users that has a connection for this system and has this user id in the system, if don't match a user a new one will be created and the `connection` info will be stored and if the user already exist the `connection` info will be inserted or updated in the user row.
+
+An important value in this method is the returned `uid`, this value is a string that uniquely identify the user in the OP Server, will never be the same as the user id inside a `connection`, in this case this value identify the use rin the OP server not in the external system. When saving a `connection` if the user doesn't exist this value will be automatically generated and will never change in the future.
+
+=== Obtain the stored user authorization data
+
+When `iamid-provider` call to our `connector.resolve(uid, claims)` method the first step is to retrieve the user authorization data from the `Users` repo, is as easy as:
+
+----
+const user = await usersRepo.get(uid)
+----
+
+This `uid` passed as first parameter in the resolve method is the user unique identifier in the OP server, or what is the same, the returned uid by the `insertOrUpdate` method. iThe obtained object is an instance of `User` that is the root object that conatin all the `Connection` objects for a given end user in the OP server. To obtain the authoriztaion data just need to use the `getConnection(systemType)` method as:
+
+----
+const { auth } = user.getConnection(SYSTEM_TYPE)
+----
+
+it's responsibility of the connector code to refresh the data in case of be needed and update the info in the `Users` repo, so normally after obtain this info and before use the connector do some type of date time validation.

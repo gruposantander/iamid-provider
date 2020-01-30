@@ -14,4 +14,14 @@
 * System text are obsolete: remove or update
 * Review Jenkins files
 
+== Docs
+
+* In connectors change the way we call connectors because should be done using a resolve() method and a proxy? we should review this because is not very easy to explain or use...
+* Should we describe events emitted or we wait for the implementation of functional events and this things??
+* In IamIdRouter in library api we should also add the HTTPError description
+* Look for IamId and replace with iamid-provider
+* In endpoint doc in == Login endpoint probably the contract change a lot after acr and more features.
+* Add Session manager dcoumentation.
+* In connnectors describe more about resolved or not resolved and the arrays.
+* When public describe repositoryes here.
 
