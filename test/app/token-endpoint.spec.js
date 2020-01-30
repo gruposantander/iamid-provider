@@ -1,7 +1,7 @@
 'use strict'
 
 const { it } = require('mocha')
-const { ClaimResponse, Claim } = require('../../lib/resolvers')
+const { ClaimResponse, Claim, Resolved } = require('../../lib/resolvers')
 const {
   TOKEN_PATH,
   PAYLOAD_AUTH, jwtSign, CLIENT_ASSERTION_TYPE, DEFAULT_REQUEST_OBJECT,
@@ -23,9 +23,9 @@ module.exports = function () {
       }
     },
     resolvedClaims: new ClaimResponse({
-      given_name: new Claim(['Juan José', 'Juanjo']),
-      family_name: new Claim(['Ramírez']),
-      email: new Claim(['juanjose.ramirez@santander.co.uk'])
+      given_name: new Claim([new Resolved('Juan José', 2), new Resolved('Juanjo', 2)]),
+      family_name: new Claim([new Resolved('Ramírez', 2)]),
+      email: new Claim([new Resolved('juanjose.ramirez@santander.co.uk')])
     })
   }
 

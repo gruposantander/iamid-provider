@@ -7,7 +7,7 @@ const {
   jwtVerify, OP_ID, CLIENT_ID, CLIENT, REDIRECT_URI, DEFAULT_REQUEST_OBJECT,
   INTERACTION_PATH, CONSENT_PATH, getInteractionIdFromInteractionUri
 } = require('./fixtures')
-const { ClaimResponse, Claim } = require('../../lib/resolvers')
+const { ClaimResponse, Claim, Resolved } = require('../../lib/resolvers')
 
 module.exports = function () {
   it('should complete a happy path', async function () {
@@ -58,12 +58,12 @@ module.exports = function () {
       })
 
     const claims = {
-      given_name: new Claim(['Juan José']),
-      family_name: new Claim(['Ramírez Escribano']),
-      total_balance: new Claim([{ amount: '10.23', currency: 'GBP' }]),
-      birthdate: new Claim(['2000-01-10']),
-      email: new Claim(['custard.apple@santander.co.uk']),
-      phone_number: new Claim(['1234567890', '9456787767'])
+      given_name: new Claim([new Resolved('Juan José', 2)]),
+      family_name: new Claim([new Resolved('Ramírez Escribano', 2)]),
+      total_balance: new Claim([new Resolved({ amount: '10.23', currency: 'GBP' }, 2)]),
+      birthdate: new Claim([new Resolved('2000-01-10', 2)]),
+      email: new Claim([new Resolved('custard.apple@santander.co.uk', 2)]),
+      phone_number: new Claim([new Resolved('1234567890', 2), new Resolved('9456787767', 2)])
     }
     const resolvedClaims = new ClaimResponse(claims)
 
@@ -73,15 +73,15 @@ module.exports = function () {
         purpose: 'general purpose',
         id_token: {
           given_name: { essential: true, purpose: 'id_token given_name purpose', result: ['Ju****sé'], unresolved: [] },
-          total_balance: { essential: true, purpose: 'id_token total_balance purpose', result: claims.total_balance.resolved, unresolved: [] }
+          total_balance: { essential: true, purpose: 'id_token total_balance purpose', result: [{ amount: '10.23', currency: 'GBP' }], unresolved: [] }
         },
         userinfo: {
           family_name: { purpose: 'userinfo family_name purpose', result: ['Ra****no'], unresolved: [] },
           given_name: { essential: true, purpose: 'userinfo given_name purpose', result: ['Ju****sé'], unresolved: [] },
-          total_balance: { essential: true, purpose: 'userinfo total_balance purpose', result: claims.total_balance.resolved, unresolved: [] },
+          total_balance: { essential: true, purpose: 'userinfo total_balance purpose', result: [{ amount: '10.23', currency: 'GBP' }], unresolved: [] },
           email: { essential: true, purpose: 'userinfo email purpose', result: ['c****e@santander.co.uk'], unresolved: [] },
           phone_number: { essential: true, purpose: 'userinfo phone_number purpose', result: ['******7890', '******7767'], unresolved: [] },
-          birthdate: { essential: true, purpose: 'userinfo birthdate purpose', result: claims.birthdate.resolved, unresolved: [] }
+          birthdate: { essential: true, purpose: 'userinfo birthdate purpose', result: ['2000-01-10'], unresolved: [] }
         }
       },
       interaction: 'consent',
@@ -121,18 +121,18 @@ module.exports = function () {
 
     strictEqual(idToken.iss, OP_ID)
     strictEqual(idToken.aud, CLIENT_ID)
-    deepStrictEqual(idToken.given_name, claims.given_name.resolved[0])
-    deepStrictEqual(idToken.total_balance, claims.total_balance.resolved[0])
+    deepStrictEqual(idToken.given_name, claims.given_name.resolved[0].value)
+    deepStrictEqual(idToken.total_balance, claims.total_balance.resolved[0].value)
 
     await agent.get('/me')
       .set('Authorization', 'Bearer ' + accessToken)
       .expect(200, {
         sub: 'e3def28859bc43cad610082f60d663e431f73d1c7a26fc06d8c67ab730978e6f',
-        family_name: claims.family_name.resolved[0],
-        total_balance: claims.total_balance.resolved[0],
-        email: claims.email.resolved[0],
-        phone_number: claims.phone_number.resolved[0],
-        birthdate: claims.birthdate.resolved[0]
+        family_name: claims.family_name.resolved[0].value,
+        total_balance: claims.total_balance.resolved[0].value,
+        email: claims.email.resolved[0].value,
+        phone_number: claims.phone_number.resolved[0].value,
+        birthdate: claims.birthdate.resolved[0].value
       })
   })
 

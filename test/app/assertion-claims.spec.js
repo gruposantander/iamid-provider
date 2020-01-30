@@ -6,7 +6,7 @@ const {
   CONSENT_PATH, INTERACTION_PATH, error,
   DEFAULT_REQUEST_OBJECT, CLIENT, AUTH
 } = require('./fixtures')
-const { ClaimResponse, Claim } = require('../../lib/resolvers')
+const { ClaimResponse, Claim, Resolved } = require('../../lib/resolvers')
 const assert = require('assert')
 const { deepStrictEqual } = assert
 
@@ -27,10 +27,10 @@ module.exports = function () {
     const requestObject = { ...DEFAULT_REQUEST_OBJECT, claims }
     const uri = await this.goToSecondInteraction(agent, { requestObject })
     const resolvedClaims = new ClaimResponse({
-      given_name: new Claim(['José']),
-      birthdate: new Claim(['1979-08-18']),
-      phone_number: new Claim(['+447523503388']),
-      total_balance: new Claim([{ currency: 'GBP', amount: '1002.00' }])
+      given_name: new Claim([new Resolved('José', 2)]),
+      birthdate: new Claim([new Resolved('1979-08-18', 2)]),
+      phone_number: new Claim([new Resolved('+447523503388', 2)]),
+      total_balance: new Claim([new Resolved({ currency: 'GBP', amount: '1002.00' }, 2)])
     })
     const interactionId = getInteractionIdFromInteractionUri(uri)
     const expected = {
@@ -75,10 +75,10 @@ module.exports = function () {
 
       const requestObject = { ...DEFAULT_REQUEST_OBJECT, claims }
       const resolvedClaims = new ClaimResponse({
-        given_name: new Claim(['José']),
+        given_name: new Claim([new Resolved('José', 2)]),
         family_name: new Claim([]),
-        email: new Claim(['jose.gomez@santander.co.uk']),
-        birthdate: new Claim(['1979-04-04'])
+        email: new Claim([new Resolved('jose.gomez@santander.co.uk', 2)]),
+        birthdate: new Claim([new Resolved('1979-04-04', 2)])
       })
       const uri = await this.goToConsent(agent, { requestObject, resolvedClaims })
       const consentRequest = { id_token: consentIdToken, approved_scopes: ['openid'] }
@@ -97,7 +97,7 @@ module.exports = function () {
         id_token: { assertion_claims: { given_name: { assertion } } }
       }
       const requestObject = { ...DEFAULT_REQUEST_OBJECT, claims }
-      const resolvedClaims = new ClaimResponse({ given_name: new Claim(['José']) })
+      const resolvedClaims = new ClaimResponse({ given_name: new Claim([new Resolved('José', 2)]) })
 
       const interactionId = await this.goToConsent(agent, { resolvedClaims, requestObject })
       await agent.post(INTERACTION_PATH + interactionId + CONSENT_PATH).send({
@@ -121,10 +121,10 @@ module.exports = function () {
       const requestObject = { ...DEFAULT_REQUEST_OBJECT, claims }
       const uri = await this.goToSecondInteraction(agent, { requestObject })
       const resolvedClaims = new ClaimResponse({
-        given_name: new Claim(['José']),
-        family_name: new Claim(['Gómez', 'GOMEZ']),
-        email: new Claim(['jose.gomez@santander.co.uk']),
-        birthdate: new Claim(['jose.gomez@santander.co.uk'])
+        given_name: new Claim([new Resolved('José', 2)]),
+        family_name: new Claim([new Resolved('Gómez', 2), new Resolved('GOMEZ', 2)]),
+        email: new Claim([new Resolved('jose.gomez@santander.co.uk', 2)]),
+        birthdate: new Claim([new Resolved('jose.gomez@santander.co.uk', 2)])
       })
       const interactionId = getInteractionIdFromInteractionUri(uri)
       await this.secondInteraction(agent, uri, { resolvedClaims }).expect({
@@ -169,7 +169,7 @@ module.exports = function () {
     }
     const requestObject = { ...DEFAULT_REQUEST_OBJECT, claims }
     const resolvedClaims = new ClaimResponse({
-      given_name: new Claim(['José'])
+      given_name: new Claim([new Resolved('José', 2)])
     })
 
     const interactionId = await this.goToConsent(agent, { requestObject, resolvedClaims })

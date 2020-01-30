@@ -3,7 +3,7 @@
 const jwt = require('jsonwebtoken')
 const fs = require('fs')
 
-const { ClaimResponse, Claim } = require('../../lib/resolvers')
+const { ClaimResponse, Claim, Resolved } = require('../../lib/resolvers')
 const { freeze } = Object
 
 const INIT_PATH = '/initiate-authorize'
@@ -54,7 +54,8 @@ const CLAIMS_FOR_REQUEST = freeze({
 })
 
 const REQUEST_WITH_CLAIMS = { ...DEFAULT_REQUEST_OBJECT, ...CLAIMS_FOR_REQUEST }
-const RESOLVED_CLAIMS = new ClaimResponse({ given_name: new Claim(['Juan José']) })
+const RESOLVED = new Resolved('Juan José', 2)
+const RESOLVED_CLAIMS = new ClaimResponse({ given_name: new Claim([RESOLVED]) })
 
 const PAYLOAD_AUTH = freeze({
   aud: OP_ID,

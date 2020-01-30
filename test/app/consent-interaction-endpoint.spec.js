@@ -7,7 +7,7 @@ const assert = require('assert').strict
 
 const { strictEqual, deepStrictEqual } = require('assert')
 
-const { ClaimResponse, Claim, Unresolved } = require('../../lib/resolvers')
+const { ClaimResponse, Claim, Unresolved, Resolved } = require('../../lib/resolvers')
 
 module.exports = function () {
   it('should require consent in second interaction', async function () {
@@ -38,12 +38,12 @@ module.exports = function () {
     const interactionUrl = await this.goToSecondInteraction(agent, { requestObject })
     const interactionId = getInteractionIdFromInteractionUri(interactionUrl)
     const claims = {
-      given_name: new Claim(['Juan José']),
-      family_name: new Claim(['Ramírez Escribano']),
-      total_balance: new Claim([{ amount: '10.23', currency: 'GBP' }]),
-      birthdate: new Claim(['2000-01-10']),
-      email: new Claim(['custard.apple@santander.co.uk']),
-      phone_number: new Claim(['1234567890', '9456787767'])
+      given_name: new Claim([new Resolved('Juan José', 2)]),
+      family_name: new Claim([new Resolved('Ramírez Escribano', 2)]),
+      total_balance: new Claim([new Resolved({ amount: '10.23', currency: 'GBP' }, 2)]),
+      birthdate: new Claim([new Resolved('2000-01-10', 2)]),
+      email: new Claim([new Resolved('custard.apple@santander.co.uk', 2)]),
+      phone_number: new Claim([new Resolved('1234567890', 2), new Resolved('9456787767', 2)])
     }
     const resolvedClaims = new ClaimResponse(claims)
     const expected = {
@@ -56,15 +56,15 @@ module.exports = function () {
         purpose: 'general purpose',
         id_token: {
           given_name: { essential: true, purpose: 'id_token given_name purpose', result: ['Ju****sé'], unresolved: [] },
-          total_balance: { essential: true, purpose: 'id_token total_balance purpose', result: claims.total_balance.resolved, unresolved: [] }
+          total_balance: { essential: true, purpose: 'id_token total_balance purpose', result: [{ amount: '10.23', currency: 'GBP' }], unresolved: [] }
         },
         userinfo: {
           family_name: { purpose: 'userinfo family_name purpose', result: ['Ra****no'], unresolved: [] },
           given_name: { essential: true, purpose: 'userinfo given_name purpose', result: ['Ju****sé'], unresolved: [] },
-          total_balance: { essential: true, purpose: 'userinfo total_balance purpose', result: claims.total_balance.resolved, unresolved: [] },
+          total_balance: { essential: true, purpose: 'userinfo total_balance purpose', result: [{ amount: '10.23', currency: 'GBP' }], unresolved: [] },
           email: { essential: true, purpose: 'userinfo email purpose', result: ['c****e@santander.co.uk'], unresolved: [] },
           phone_number: { essential: true, purpose: 'userinfo phone_number purpose', result: ['******7890', '******7767'], unresolved: [] },
-          birthdate: { essential: true, purpose: 'userinfo birthdate purpose', result: claims.birthdate.resolved, unresolved: [] }
+          birthdate: { essential: true, purpose: 'userinfo birthdate purpose', result: ['2000-01-10'], unresolved: [] }
         }
       },
       scopes: ['openid']
@@ -210,7 +210,7 @@ module.exports = function () {
     })
     const interactionUri = await this.goToSecondInteraction(agent, { requestObject })
     const resolvedClaims = new ClaimResponse({
-      given_name: new Claim(['Juan José']),
+      given_name: new Claim([new Resolved('Juan José', 2)]),
       family_name: new Claim([], [Unresolved.notFound()])
     })
     const interactionId = getInteractionIdFromInteractionUri(interactionUri)
