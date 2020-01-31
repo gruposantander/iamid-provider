@@ -8,6 +8,6 @@ describe(pkg.name, function () {
   describe('Phone Number', require('./phone-number.spec'))
   describe('Mask types', require('./mask.spec'))
   describe('Assertion Language', require('./assertion-lang.spec'))
-  describe('Resolver Proxy', require('./resolvers.spec'))
+  describe('Resolvers', require('./resolvers.spec'))
   describe('IAmId', require('./app/app.spec'))
 })
