@@ -57,7 +57,12 @@ module.exports = function () {
       interaction_path: `/interaction/${interactionId}/consent`
     }
     await this.secondInteraction(agent, uri, { resolvedClaims }).expect(expected)
-    assert(this.claimStub.calledOnceWith(AUTH, ['given_name', 'birthdate', 'phone_number', 'total_balance']))
+    assert(this.claimStub.calledOnceWith(AUTH, {
+      given_name: { ials: [1] },
+      birthdate: { ials: [1] },
+      phone_number: { ials: [1] },
+      total_balance: { ials: [1] }
+    }))
   })
   ;[
     ['current', { assertions: { given_name: 0, family_name: 29, email: -1 } }],

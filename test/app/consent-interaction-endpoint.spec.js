@@ -73,9 +73,14 @@ module.exports = function () {
       .expect('Content-Type', 'application/json; charset=utf-8')
       .expect(expected)
 
-    assert(this.claimStub.calledOnceWith(AUTH, [
-      'given_name', 'total_balance', 'family_name',
-      'email', 'phone_number', 'birthdate']))
+    assert(this.claimStub.calledOnceWith(AUTH, {
+      given_name: { ials: [1] },
+      total_balance: { ials: [1] },
+      family_name: { ials: [1] },
+      email: { ials: [1] },
+      phone_number: { ials: [1] },
+      birthdate: { ials: [1] }
+    }))
   })
 
   it('should return the "state" parameter', async function () {
