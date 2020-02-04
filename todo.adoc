@@ -5,11 +5,8 @@
 == IAL
 
 * Test: filter a response with lower ial
-* Change structure to include ial and fix tests
-* Change claim response
-* Add test for addResolved and addUnresolved
 * Remove sensitive class and use Resolved class only
-* Remove filer values from assertion lang
+* Remove filter values from assertion lang
 
 == Backlog
 
