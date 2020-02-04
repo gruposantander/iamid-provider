@@ -2,11 +2,12 @@
 
 const { describe, it, it: they } = require('mocha')
 const { deepEqual, throws, equal } = require('assert').strict
-const { filterValues, UnknownOperatorError, compile } = require('../lib/assertion-lang')
+const { UnknownOperatorError, compile } = require('../lib/assertion-lang')
 
 module.exports = function () {
   function check (values, assertions, expectation, type) {
-    deepEqual(filterValues(values, assertions, type), expectation)
+    const compiled = compile(assertions, type)
+    deepEqual(values.filter(compiled), expectation)
   }
   describe('Compile method', function () {
     it('should fail if the expression is not an object', function () {
@@ -122,7 +123,7 @@ module.exports = function () {
   })
   describe('Unknown operators', function () {
     it('should fail if there is an unknown operator', function () {
-      throws(() => filterValues(['Joe'], { $unknown_operator: 'Joe' }), (error) => {
+      throws(() => compile({ $unknown_operator: 'Joe' }), (error) => {
         equal(error instanceof UnknownOperatorError, true)
         equal(error.name, 'UnknownOperatorError')
         equal(error.message, 'unknown operator: $unknown_operator')
