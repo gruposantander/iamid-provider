@@ -85,7 +85,7 @@ module.exports = function () {
 
   it('should return the "state" parameter', async function () {
     const agent = this.agent()
-    const requestObject = { ...REQUEST_WITH_CLAIMS, state: 'mystate' }
+    const requestObject = { ...REQUEST_WITH_CLAIMS, state: 'state' }
     const interactionUrl = await this.goToSecondInteraction(agent, { requestObject })
     const interactionId = getInteractionIdFromInteractionUri(interactionUrl)
     const expected = {
@@ -93,7 +93,7 @@ module.exports = function () {
       interaction_id: interactionId,
       interaction_path: `/interaction/${interactionId}/consent`,
       redirect_uri: 'http://127.0.0.1:8080/cb',
-      state: 'mystate',
+      state: 'state',
       client: CLIENT,
       claims: {
         purpose: 'general purpose',
