@@ -4,9 +4,8 @@
 
 == IAL
 
-* Test: filter a response with lower ial
+* Test that every claim request in different sections filter by ial
 * Remove sensitive class and use Resolved class only
-* Remove filter values from assertion lang
 
 == Backlog
 
@@ -27,6 +26,6 @@
 * In IamIdRouter in library api we should also add the HTTPError description
 * Look for IamId and replace with iamid-provider
 * In endpoint doc in == Login endpoint probably the contract change a lot after acr and more features.
-* In connnectors describe more about resolved or not resolved and the arrays.
-* When public describe repositoryes here.
+* In connectors describe more about resolved or not resolved and the arrays.
+* When public describe repositories here.
 
