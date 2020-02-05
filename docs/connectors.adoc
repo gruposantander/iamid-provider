@@ -7,72 +7,138 @@ The concrete implementation of the connector is up to developer but a real imple
 
 == What is a connector?
 
-A connector (also known as resolver) is just a Javascript function object that accept an `auth` object and an Array of claims requests and return a `ClaimResponse` object with the claims values. (In an Async way off course) Also the connector should have a property `claims` that expose an array of claims names that are resolved by this connector.
+A connector is to piece of code that "resolve" claims, or what is the same, is the piece that obtain the End-User data from an external system, normally using an API.
 
-So a connector must fulfill the next contract:
+Technically speaking a connector (also known as resolver) is just a Javascript function object (an async function) with one properties `claims`.
+
+The function accept two parameters, an `auth` object that contain all the needed info to authenticate the End-User against the external system API (see <<User session and credentials>>) and a `requestedClaims` object that contain as keys the name of the claims that should be retrieved by the connector and as value a object with options that should be take into account while obtaining the claims.
+
+.requestedClaims object
 [source,javascript]
 ----
-async function exampleResolver (auth, names) { <1>
+{
+  given_name: {
+    ials: [2]
+  },
+  email: {
+    ials: [1]
+  }
+----
+
+The connector function should return a `ClaimResponse` object with the claims value (See <<Domain object that should be created by connector>>)
+
+The connector (function object) should expose a property called `claims` that contain the supported claims by this connector and also the level of assurance, also known as *ial* (See `IamID` specification for more info), so for example a connector that resolve the _"given_name"_ and _"phone_number"_ with self asserted by the external system the connector should expose a `claims` property as:
+
+.claims property example
+[source,javascript]
+----
+{
+  given_name: {
+    ial: 1
+  },
+  phone_number: {
+    ial: 2
+  }
+}
+----
+
+So as an example of a code that implement the connector contract we can have something as easy as:
+
+.Connector contract example
+[source,javascript]
+----
+async function exampleResolver (auth, requestedClaims) { <1>
   // Code comes here
 }
-exampleResolver.claims = ['claim1', 'claim2', 'claim3'] <2>
+exampleResolver.claims = { claim1: { ial: 1 }, claim2: { ial: 2}, claim3: { ial: 2 } }  <2>
 ----
-<1> Is an `async` function that accept `auth` and `names` params.
-<2> Has a `claims` property that is an array of claim names that are resolved by this connector.
+<1> Is an `async` function that accept `auth` and `requestedClaims` params.
+<2> Has a `claims` property that is an object that define the claims resolved by this connector.
 
 == How to implement a connector?
 
-There is no more requirement in how to implement a Connector, just fulfilling the contract in an async way is ok.
+There is no more requirement in how to implement a Connector, just fulfilling the contract in an async way is ok, but you can implement the connector using some kind of REST client, doing directly the calls to other system inside the connector function....
 
-Normally the data from the user will be in a remote API outside the OP server so the developer can create some kind of Rest client to obtain the information, this is the case for https://uk-gitlab.almuk.santanderuk.corp/verified-id/op-server[Santander-uk project ], inside the `src/minibank` folder there exist a `client.js` that implement the connection to the minibank API using the library `node-fetch`, but again the connector implementation is decision of the developer.
+Normally the data from the user will be in a remote API outside the OP server so the developer can create some kind of Rest client to obtain the information, this is the case for https://uk-gitlab.almuk.santanderuk.corp/verified-id/op-server[Santander-uk project ], inside the `src/minibank` folder there exist a `client.js` that implement the connection to the minibank API using the library `node-fetch`, and inside the connectors implementations `src/minibank/resolver.js` the client is used to manage the connections.
 
 As a basic implementation example of a Connector we can have something like:
 ----
-const { resolvers: { Claim, ClaimResponse, Unresolved: { notFound } } } = require('@santander/iamid-provider') <1>
-async function exampleResolver (auth, names) {
-  const apiResponse = await client.basicInfo(auth.token.access_token) <2>
+const { resolvers: { ClaimResponse, Claim, Resolved, Unresolved: { notFound } } } = require('@santander/iamid-provider') <1>
+
+async function exampleResolver (auth, requestedClaims) {
+  const apiResponse = await client.basicInfo(auth.token) <2>
   const { phoneNumber, email } = apiResponse
-  const phoneC = phoneNumber ? new Claim([phoneNumber]) : new Claim([], [notFound()]) <3>
-  const emailC = email ? new Claim([email]) : new Claim([], [notFound()])
-  return new ClaimResponse({ 'phone': phoneC, 'email': emailC }) <4>
+  const phoneClaim = phoneNumber ? new Claim([new Resolved(phoneNumber, 1)]) : new Claim([], [notFound()]) <3>
+  const emailClaim = email ? new Claim([new Resolved(email, 1)]) : new Claim([], [notFound()])
+  return new ClaimResponse({ 'phone': phoneClaim, 'email': emailClaim }) <4>
 }
-exampleResolver.claims = ['phone', 'email'] <5>
+
+exampleResolver.claims = { phone_number: { ial: 1 }, email: { ial: 1 } } <5>
 ----
-<1> Import the needed classes from `iamid-provider`
-<2> Call to a client to obtain the user data
-<3> Create a `Claim` object with resolved or not resolved value depending of the api response
-<4> Create a `ClaimResponse` with all the claims resolved or not.
+<1> Import the needed classes from `iamid-provider`, all needed classes for implement a connector are under `resolvers` module.
+<2> Call to a client to obtain the user data using the provided auth info as input of the method.
+<3> Check if we have the data and create a `Claim` object with resolved or not resolved value depending of the api response. See <<Domain object that should be created by connector>> section for more info.
+<4> Create a `ClaimResponse` object with all the claims resolved or not.
 <5> Expose the claims resolved by our connector.
 
 == Domain object that should be created by connector
 
-TBD...
+The connector function should return a `ClaimResponse` instance, this class contain for each claim that is requested using the `requestedClaims` parameter the connector a `Claim` object. The way to create a `ClaimResponse` is passing an js object with the claim name as key an a `Claim` instance as value (See examples below)
+
+A `Claim` object containing an array with the resolved values and another array with the unresolved types. Resolved and unresolved values are arrays because one connector can return more than one value for each claim, for example in the case of the _phone_number_ claim an End-User can have more than one value registered, this array is returned and presented to the user in the consent screen so End-User can select the value that want to share with the RP.
+
+Each item inside the _resolved_ array is a `Resolved` instance, what is just an object that contain a `value` and a `ial`, the ial info will be used to filter values in case that don't match the minimum level requested by the RP.
+
+Each item in the _unresolved_ array is a `Unresolved` instance that contain the reason why this claim is not resolved, inside the `Unresolved` class there are already provided two static functions for types `notFound()` and `internalError()`, this types are internally used by the `proxyResolvers` when a requested claim cannot be resolved and when there are any unexpected error calling a connector.
+
+So some examples about how to create a `ClaimResponse` are:
+[source,js]
+----
+// Create a resolved claim with two values
+const phoneClaim = new Claim([new Resolved('+4455667788', 1), new Resolved('+4466778899', 1)])
+
+// Create a claim that have not been found
+const emailClaim = new Claim([], [notFound()])
+
+// Create a claim not resolved because an error in the system
+const nameClaim = new Claim([], [internalError()])
+
+// Create a ClaimResponse with one claim
+const response = new ClaimResponse({ phone: phoneClaim })
+
+// Create a ClaimResponse with multiple claims
+const result = new ClaimResponse({ email: emailClaim, given_name: nameClaim })
+----
 
 == User session and credentials
 
-Is out of the scope of the `iamid-provider` how exactly the authentication info for the End-User is obtained, the time to obtain this auth info is in the Login process, or what is the same in the Login endpoint, that should be implemented by the developer, See <<endpoints.adoc#,Implement the interactions endpoints>> for more info. Just to highlight that connectors should use resource owner credential for API authorization.
+Is out of the scope of the `iamid-provider` how exactly the authentication info for the End-User is obtained, the time to obtain this auth info is in the Login process, or what is the same in the Login endpoint (that should be implemented by the developer). See <<endpoints.adoc#,Implement the interactions endpoints>> for more info. Just to highlight that connectors should use resource owner credential for API authorization.
 
-To allow connectors persist this session info `iamid-provider` provide a repository, see more in <<usermanagment.adoc#,User authorization data management>>, but the exactly data that is store inside the `auth` object and how to refresh it's responsibility of the OP developer.
+To allow connectors persist this session info `iamid-provider` provide a repository, see more in <<usermanagment.adoc#,User authorization data management>>, but the exactly data that is store inside the `auth` object and how to refresh it's responsibility of the OP developer, when calling to the connector function the `auth` object passed as input will be exactly the same object stored by the developer in the login process.
 
-== Using the proxyClaimResolvers
+== Using the proxyResolvers
 
-To allow developers to have multiple connectors for resolve different claims without create a mess, (for example connectors can be split by functionality, domain...) `iamid-provider` offer a `proxyClaimResolvers` that merge/group connectors and contain the logic to select the correct connector based on the exposed claims by the connectors, also filter result base don the `ial`...
+To provide the connectors (one or more) to `iamid-provider` the developer should use a `proxyResolvers`, the proxy is a "grouper" that allow developers to have multiple connectors for resolve different claims without create a mess, (for example connectors can be split by functionality, domain...).
+The proxy contain the next logic:
+- Filter claims that cannot be resolve by a connector, based on the exposed `claim` parameter.
+- Choose the correct connectors based on the requested claims (try to make avoid uneeded calls)
+- Filter result based on requested `ial`.
 
 Use a proxy is as easy as:
 
 [source,js]
 ----
-const { resolvers : { proxyClaimResolvers } } = require('@santander/iamid-provider') <1>
-const proxy = proxyClaimResolvers([accountsResolver, identifyMeResolver]) <2>
+const { resolvers : { proxyResolvers } } = require('@santander/iamid-provider') <1>
+const proxy = proxyResolvers(accountsResolver, identifyMeResolver) <2>
 ----
-<1> Import the `proxyClaimResolvers` from `iamid-provider`
-<2> Pass an array of connectors to constructor, in this case `accountsResolver` and `identifyMeResolver` are different connectors.
+<1> Import the `proxyResolvers` from `iamid-provider` (in `resolvers` module)
+<2> Pass the connectors to proxyResolvers method, in this case `accountsResolver` and `identifyMeResolver` are different connectors. The result of `proxyResolvers()` is a function thats should be provide to `IAmIdRouter` at initialization time.
 
-TIP: Take into account that even if you have only one connector you need to use a `proxyClaimResolvers` to provide the connectors to `iamid-provider`.
+TIP: Take into account that even if you have only one connector you need to use a `proxyResolvers` to provide the connectors to `iamid-provider`.
 
 == Using the connectors
 
-COnnectors are used directly by `iamid-provider` when need to calculate the claims, this happen in the call to the `/interaction` endpoint when consent prompt is going to be asked, all this is carry on by the `iamid-provider` so developer just need to worry to pass the `proxyClaimResolvers` instance to the `IAmIdRouter` in the constructor. This can be seen in details in <<endpoints.adoc#,Endpoints>> documentation, but just to remember should be provided in the extension of the `IAmIdRouter` in constructor method as for example:
+Connectors are used directly by `iamid-provider` when need to calculate the claims, this happen in the call to the `/interaction` endpoint when consent prompt is going to be asked, all this is carry on by the `iamid-provider` so developer just need to worry to pass the `proxyResolvers` instance to the `IAmIdRouter` in the constructor. This can be seen in details in <<endpoints.adoc#,Endpoints>> documentation, but just to remember should be provided in the extension of the `IAmIdRouter` in constructor method as for example:
 
 ----
 class CustomInteractionRouter extends IAmIdRouter {
@@ -81,5 +147,3 @@ class CustomInteractionRouter extends IAmIdRouter {
   }
 }
 ----
-
-Now the `IAmId` will call the `resolve(auth, claims)` method of the proxy when need the claims info.
