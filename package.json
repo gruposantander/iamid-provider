@@ -1,6 +1,6 @@
 {
   "name": "@santander/iamid-provider",
-  "version": "0.2.0-2",
+  "version": "0.2.0",
   "description": "OpenID, OAuth 2.0 and IAMID Authorization Server implementation for Node.js",
   "main": "index.js",
   "scripts": {
