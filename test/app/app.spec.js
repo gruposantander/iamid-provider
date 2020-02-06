@@ -144,6 +144,8 @@ const suite = function () {
         .send(`redirect_uri=${REDIRECT_URI}`)
         .expect(200)
     }
+    this.userinfo = (agent, accessToken) =>
+      agent.get('/me').set('Authorization', 'Bearer ' + accessToken).expect(200)
   })
 
   after('Stop server', function (cb) {
@@ -172,6 +174,7 @@ const suite = function () {
   describe('Assertion Claims', require('./assertion-claims.spec'))
   describe('Users Domain', require('./users.spec'))
   describe('Repositories', require('./repositories.spec'))
+  describe('IAL Flow', require('./ial.spec'))
 }
 
 module.exports = function () {

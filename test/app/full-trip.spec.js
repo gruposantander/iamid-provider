@@ -1,7 +1,7 @@
 'use strict'
 
 const assert = require('assert')
-const { strictEqual, deepStrictEqual } = assert
+const { equal, deepEqual } = assert.strict
 const { it } = require('mocha')
 const {
   jwtVerify, OP_ID, CLIENT_ID, CLIENT, REDIRECT_URI, DEFAULT_REQUEST_OBJECT,
@@ -47,8 +47,8 @@ module.exports = function () {
         interaction_path: `/interaction/${interactionId}/login`
       })
       .expect(({ body }) => {
-        strictEqual(body.interaction, 'login')
-        strictEqual(body.acr, 'any')
+        equal(body.interaction, 'login')
+        equal(body.acr, 'any')
         assert(body.interaction_id.length > 0)
       })
 
@@ -72,16 +72,18 @@ module.exports = function () {
       claims: {
         purpose: 'general purpose',
         id_token: {
-          given_name: { essential: true, purpose: 'id_token given_name purpose', result: ['Ju****sé'], unresolved: [] },
-          total_balance: { essential: true, purpose: 'id_token total_balance purpose', result: [{ amount: '10.23', currency: 'GBP' }], unresolved: [] }
+          assertion_claims: {},
+          given_name: { ial: 1, essential: true, purpose: 'id_token given_name purpose', result: ['Ju****sé'], unresolved: [] },
+          total_balance: { ial: 1, essential: true, purpose: 'id_token total_balance purpose', result: [{ amount: '10.23', currency: 'GBP' }], unresolved: [] }
         },
         userinfo: {
-          family_name: { purpose: 'userinfo family_name purpose', result: ['Ra****no'], unresolved: [] },
-          given_name: { essential: true, purpose: 'userinfo given_name purpose', result: ['Ju****sé'], unresolved: [] },
-          total_balance: { essential: true, purpose: 'userinfo total_balance purpose', result: [{ amount: '10.23', currency: 'GBP' }], unresolved: [] },
-          email: { essential: true, purpose: 'userinfo email purpose', result: ['c****e@santander.co.uk'], unresolved: [] },
-          phone_number: { essential: true, purpose: 'userinfo phone_number purpose', result: ['******7890', '******7767'], unresolved: [] },
-          birthdate: { essential: true, purpose: 'userinfo birthdate purpose', result: ['2000-01-10'], unresolved: [] }
+          assertion_claims: {},
+          family_name: { ial: 1, purpose: 'userinfo family_name purpose', result: ['Ra****no'], unresolved: [] },
+          given_name: { ial: 1, essential: true, purpose: 'userinfo given_name purpose', result: ['Ju****sé'], unresolved: [] },
+          total_balance: { ial: 1, essential: true, purpose: 'userinfo total_balance purpose', result: [{ amount: '10.23', currency: 'GBP' }], unresolved: [] },
+          email: { ial: 1, essential: true, purpose: 'userinfo email purpose', result: ['c****e@santander.co.uk'], unresolved: [] },
+          phone_number: { ial: 1, essential: true, purpose: 'userinfo phone_number purpose', result: ['******7890', '******7767'], unresolved: [] },
+          birthdate: { ial: 1, essential: true, purpose: 'userinfo birthdate purpose', result: ['2000-01-10'], unresolved: [] }
         }
       },
       interaction: 'consent',
@@ -114,15 +116,15 @@ module.exports = function () {
       }
     } = await this.token(agent, code)
 
-    strictEqual(scope, 'openid')
-    strictEqual(tokenType, 'Bearer')
+    equal(scope, 'openid')
+    equal(tokenType, 'Bearer')
 
     const idToken = jwtVerify(idTokenStr)
 
-    strictEqual(idToken.iss, OP_ID)
-    strictEqual(idToken.aud, CLIENT_ID)
-    deepStrictEqual(idToken.given_name, claims.given_name.resolved[0].value)
-    deepStrictEqual(idToken.total_balance, claims.total_balance.resolved[0].value)
+    equal(idToken.iss, OP_ID)
+    equal(idToken.aud, CLIENT_ID)
+    deepEqual(idToken.given_name, claims.given_name.resolved[0].value)
+    deepEqual(idToken.total_balance, claims.total_balance.resolved[0].value)
 
     await agent.get('/me')
       .set('Authorization', 'Bearer ' + accessToken)

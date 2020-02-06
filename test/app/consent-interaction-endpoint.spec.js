@@ -55,16 +55,18 @@ module.exports = function () {
       claims: {
         purpose: 'general purpose',
         id_token: {
-          given_name: { essential: true, purpose: 'id_token given_name purpose', result: ['Ju****sé'], unresolved: [] },
-          total_balance: { essential: true, purpose: 'id_token total_balance purpose', result: [{ amount: '10.23', currency: 'GBP' }], unresolved: [] }
+          assertion_claims: {},
+          given_name: { essential: true, ial: 1, purpose: 'id_token given_name purpose', result: ['Ju****sé'], unresolved: [] },
+          total_balance: { essential: true, ial: 1, purpose: 'id_token total_balance purpose', result: [{ amount: '10.23', currency: 'GBP' }], unresolved: [] }
         },
         userinfo: {
-          family_name: { purpose: 'userinfo family_name purpose', result: ['Ra****no'], unresolved: [] },
-          given_name: { essential: true, purpose: 'userinfo given_name purpose', result: ['Ju****sé'], unresolved: [] },
-          total_balance: { essential: true, purpose: 'userinfo total_balance purpose', result: [{ amount: '10.23', currency: 'GBP' }], unresolved: [] },
-          email: { essential: true, purpose: 'userinfo email purpose', result: ['c****e@santander.co.uk'], unresolved: [] },
-          phone_number: { essential: true, purpose: 'userinfo phone_number purpose', result: ['******7890', '******7767'], unresolved: [] },
-          birthdate: { essential: true, purpose: 'userinfo birthdate purpose', result: ['2000-01-10'], unresolved: [] }
+          assertion_claims: {},
+          family_name: { ial: 1, purpose: 'userinfo family_name purpose', result: ['Ra****no'], unresolved: [] },
+          given_name: { essential: true, ial: 1, purpose: 'userinfo given_name purpose', result: ['Ju****sé'], unresolved: [] },
+          total_balance: { essential: true, ial: 1, purpose: 'userinfo total_balance purpose', result: [{ amount: '10.23', currency: 'GBP' }], unresolved: [] },
+          email: { essential: true, ial: 1, purpose: 'userinfo email purpose', result: ['c****e@santander.co.uk'], unresolved: [] },
+          phone_number: { essential: true, ial: 1, purpose: 'userinfo phone_number purpose', result: ['******7890', '******7767'], unresolved: [] },
+          birthdate: { essential: true, ial: 1, purpose: 'userinfo birthdate purpose', result: ['2000-01-10'], unresolved: [] }
         }
       },
       scopes: ['openid']
@@ -98,11 +100,14 @@ module.exports = function () {
       claims: {
         purpose: 'general purpose',
         id_token: {
+          assertion_claims: {},
           given_name: {
-            essential: true, purpose: 'id_token given_name purpose', result: ['Ju****sé'], unresolved: []
+            essential: true, ial: 1, purpose: 'id_token given_name purpose', result: ['Ju****sé'], unresolved: []
           }
         },
-        userinfo: {}
+        userinfo: {
+          assertion_claims: {}
+        }
       },
       scopes: ['openid']
     }
@@ -125,9 +130,12 @@ module.exports = function () {
         client: CLIENT,
         claims: {
           id_token: {
-            given_name: { result: ['Ju****sé'], unresolved: [] }
+            assertion_claims: {},
+            given_name: { ial: 1, result: ['Ju****sé'], unresolved: [] }
           },
-          userinfo: {}
+          userinfo: {
+            assertion_claims: {}
+          }
         },
         scopes: ['openid']
       })
@@ -151,10 +159,12 @@ module.exports = function () {
       claims: {
         id_token: {
           assertion_claims: {
-            given_name: { assertion: { $eq: 'John' }, result: [], unresolved: [] }
+            given_name: { assertion: { $eq: 'John' }, ial: 1, result: [], unresolved: [] }
           }
         },
-        userinfo: {}
+        userinfo: {
+          assertion_claims: {}
+        }
       },
       scopes: ['openid']
     })
@@ -166,7 +176,7 @@ module.exports = function () {
     const resolvedClaims = new ClaimResponse()
     const { body: { interaction, claims } } = await this.secondInteraction(agent, interactionUrl, { resolvedClaims })
     strictEqual(interaction, 'consent')
-    deepStrictEqual(claims, { id_token: {}, userinfo: {} })
+    deepStrictEqual(claims, { id_token: { assertion_claims: {} }, userinfo: { assertion_claims: {} } })
   })
 
   it('should filter out non supported claims', async function () {
@@ -193,14 +203,18 @@ module.exports = function () {
       claims: {
         purpose: 'general purpose',
         id_token: {
+          assertion_claims: {},
           given_name: {
+            ial: 1,
             essential: true,
             purpose: 'id_token given_name purpose',
             result: ['Ju****sé'],
             unresolved: []
           }
         },
-        userinfo: {}
+        userinfo: {
+          assertion_claims: {}
+        }
       },
       scopes: ['openid']
     })
@@ -227,10 +241,13 @@ module.exports = function () {
       client: CLIENT,
       claims: {
         id_token: {
-          given_name: { essential: true, result: ['Ju****sé'], unresolved: [] },
-          family_name: { essential: true, result: [], unresolved: [{ type: 'not_found' }] }
+          assertion_claims: {},
+          given_name: { ial: 1, essential: true, result: ['Ju****sé'], unresolved: [] },
+          family_name: { ial: 1, essential: true, result: [], unresolved: [{ type: 'not_found' }] }
         },
-        userinfo: {}
+        userinfo: {
+          assertion_claims: {}
+        }
       },
       scopes: ['openid']
     })
