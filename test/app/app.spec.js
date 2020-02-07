@@ -34,7 +34,7 @@ const suite = function () {
     const resolve = sinon.stub()
     const login = sinon.stub()
     this.app = new IAmId(this.environment, this.secrets)
-    this.app.use(new InteractionRouter(this.app, { login, resolve }).routes())
+    this.app.use(new InteractionRouter(this.app, login, resolve).routes())
 
     await this.app.init()
     this.claimStub = resolve

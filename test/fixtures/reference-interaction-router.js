@@ -18,10 +18,10 @@ class UnauthorizedContextError extends HTTPError {
 }
 
 class SantanderUKInteractionRouter extends IAmIdRouter {
-  constructor (app, connector) {
-    super(app, connector)
+  constructor (app, login, resolver) {
+    super(app, resolver)
 
-    // As we already have in configurtaion we get from there
+    // As we already have in configuration we get from there
     const INTERACTION_PATH = app.configuration.routes.interaction
     const self = this
 
@@ -29,7 +29,7 @@ class SantanderUKInteractionRouter extends IAmIdRouter {
      * Login endpoint execute the login of the user against minibank system
      * @param {string} session_id uid of the authorization session
      */
-    async function login (ctx, next) {
+    async function loginHandler (ctx, next) {
       const { interaction } = ctx
       const { body: { user, pass } } = ctx.request
 
@@ -40,7 +40,7 @@ class SantanderUKInteractionRouter extends IAmIdRouter {
 
       let userId
       try {
-        userId = await connector.login(user, pass)
+        userId = await login(user, pass)
       } catch (err) {
         if (err instanceof UnauthorizedError) {
           throw new UnauthorizedContextError(err, interaction)
@@ -54,13 +54,13 @@ class SantanderUKInteractionRouter extends IAmIdRouter {
      * consent endpoint store the consent information decided by the user
      * @param {string} session_id uid of the authorization session
      */
-    async function consent (ctx, next) {
+    async function consentHandler (ctx, next) {
       await self.processConsent(ctx.request.body, ctx, next)
     }
 
     this
-      .post(INTERACTION_PATH + '/:interactionId/login', login)
-      .post(INTERACTION_PATH + '/:interactionId/consent', consent)
+      .post(INTERACTION_PATH + '/:interactionId/login', loginHandler)
+      .post(INTERACTION_PATH + '/:interactionId/consent', consentHandler)
   }
 }
 
