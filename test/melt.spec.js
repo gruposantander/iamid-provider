@@ -4,9 +4,10 @@ const { it, describe } = require('mocha')
 const { deepEqual } = require('assert').strict
 const melt = require('../lib/melt')
 
-describe('Configuration Constrains', function () {
+describe('Object Melter', function () {
   const string1 = 'string-1'
   const string2 = 'string-2'
+  const string3 = 'string-3'
   const rules = {}
 
   it('should merge multilevel object by default', function () {
@@ -51,5 +52,13 @@ describe('Configuration Constrains', function () {
     const specific = { array1: [2, 3], array2: [1, 2] }
     const melted = melt(rules, base, specific)
     deepEqual(melted, { array1: [2, 3], array2: [1, 2] })
+  })
+
+  it('should allow several specific configurations', function () {
+    const configuration1 = { string1, string2, string3 }
+    const configuration2 = { string1: string2 }
+    const configuration3 = { string2: string1 }
+    const melted = melt(rules, configuration1, configuration2, configuration3)
+    deepEqual(melted, { string1: string2, string2: string1, string3 })
   })
 })
