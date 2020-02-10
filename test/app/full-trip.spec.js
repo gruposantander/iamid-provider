@@ -5,7 +5,8 @@ const { equal, deepEqual } = assert.strict
 const { it } = require('mocha')
 const {
   jwtVerify, OP_ID, CLIENT_ID, CLIENT, REDIRECT_URI, DEFAULT_REQUEST_OBJECT,
-  INTERACTION_PATH, CONSENT_PATH, getInteractionIdFromInteractionUri
+  INTERACTION_PATH, CONSENT_PATH, getInteractionIdFromInteractionUri, PAYLOAD_AUTH,
+  TOKEN_PATH, jwtSign, CLIENT_ASSERTION_TYPE
 } = require('./fixtures')
 const { ClaimResponse, Claim, Resolved } = require('../../lib/resolvers')
 
@@ -150,6 +151,115 @@ module.exports = function () {
       .expect(302)
       .expect(({ header, body }) => {
         assert(header.location.startsWith('/interaction/'), 'Redirection to /interaction endpoint')
+      })
+  })
+
+  it('should complete full-trip without "redirect_uri" when client has just one', async function () {
+    const agent = this.agent()
+    const { redirect_uri: _, ...defaultReqObj } = DEFAULT_REQUEST_OBJECT
+    const requestObject = {
+      ...defaultReqObj,
+      ...{
+        nonce: 'banana',
+        scope: 'openid',
+        claims: {
+          purpose: 'general purpose',
+          id_token: {
+            given_name: { essential: true, purpose: 'id_token given_name purpose' }
+          },
+          userinfo: {
+            family_name: { purpose: 'userinfo family_name purpose' }
+          }
+        }
+      }
+    }
+
+    const interactionUri = await this.goToInteraction(agent, { requestObject })
+    const interactionId = getInteractionIdFromInteractionUri(interactionUri)
+    await agent.get(interactionUri)
+      .expect(200, {
+        interaction: 'login',
+        acr: 'any',
+        interaction_id: interactionId,
+        redirect_uri: 'http://127.0.0.1:8080/cb',
+        interaction_path: `/interaction/${interactionId}/login`
+      })
+
+    const { header: { location: interactionUri2 } } = await this.login(agent, interactionId)
+      .expect(({ header: { location } }) => {
+        assert(location.startsWith('/interaction'))
+      })
+
+    const claims = {
+      given_name: new Claim([new Resolved('Juan José', 2)]),
+      family_name: new Claim([new Resolved('Ramírez Escribano', 2)])
+    }
+
+    const resolvedClaims = new ClaimResponse(claims)
+
+    const { body: { interaction_id: interactionId2 } } = await this.secondInteraction(agent, interactionUri2, { resolvedClaims }).expect({
+      client: CLIENT,
+      claims: {
+        purpose: 'general purpose',
+        id_token: {
+          assertion_claims: {},
+          given_name: { ial: 1, essential: true, purpose: 'id_token given_name purpose', result: ['Ju****sé'], unresolved: [] }
+        },
+        userinfo: {
+          assertion_claims: {},
+          family_name: { ial: 1, purpose: 'userinfo family_name purpose', result: ['Ra****no'], unresolved: [] }
+        }
+      },
+      interaction: 'consent',
+      scopes: ['openid'],
+      interaction_id: interactionId,
+      redirect_uri: 'http://127.0.0.1:8080/cb',
+      interaction_path: `/interaction/${interactionId}/consent`
+    })
+
+    const { header: { location } } = await agent
+      .post(INTERACTION_PATH + interactionId2 + CONSENT_PATH)
+      .send({
+        id_token: {
+          approved_claims: ['given_name']
+        },
+        userinfo: {
+          approved_claims: ['family_name']
+        },
+        approved_scopes: ['openid']
+      })
+      .expect(302)
+    assert(location.startsWith(REDIRECT_URI))
+
+    const code = new URL(location).searchParams.get('code')
+    const jwtSec = jwtSign(PAYLOAD_AUTH)
+    const {
+      body: {
+        scope, token_type: tokenType,
+        id_token: idTokenStr,
+        access_token: accessToken
+      }
+    } = await agent.post(TOKEN_PATH)
+      .send(`client_assertion_type=${CLIENT_ASSERTION_TYPE}`)
+      .send(`client_assertion=${jwtSec}`)
+      .send(`code=${code}`)
+      .send('grant_type=authorization_code')
+      .expect(200)
+
+    equal(scope, 'openid')
+    equal(tokenType, 'Bearer')
+
+    const idToken = jwtVerify(idTokenStr)
+
+    equal(idToken.iss, OP_ID)
+    equal(idToken.aud, CLIENT_ID)
+    deepEqual(idToken.given_name, 'Juan José')
+
+    await agent.get('/me')
+      .set('Authorization', 'Bearer ' + accessToken)
+      .expect(200, {
+        sub: 'e3def28859bc43cad610082f60d663e431f73d1c7a26fc06d8c67ab730978e6f',
+        family_name: 'Ramírez Escribano'
       })
   })
 }
