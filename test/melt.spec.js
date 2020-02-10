@@ -61,4 +61,15 @@ describe('Object Melter', function () {
     const melted = melt(rules, configuration1, configuration2, configuration3)
     deepEqual(melted, { string1: string2, string2: string1, string3 })
   })
+
+  it.skip('should object loops', function () {
+    const configuration1 = { string1 }
+    configuration1.object1 = configuration1
+    const configuration2 = { string2 }
+    configuration2.object1 = configuration2
+    const melted = melt(rules, configuration1, configuration2)
+    const expected = { string1, string2 }
+    expected.object1 = expected
+    deepEqual(melted, expected)
+  })
 })
