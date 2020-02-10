@@ -10,4 +10,5 @@ describe(pkg.name, function () {
   describe('Assertion Language', require('./assertion-lang.spec'))
   describe('Resolvers', require('./resolvers.spec'))
   describe('IAmId', require('./app/app.spec'))
+  require('./melt.spec')
 })

@@ -75,7 +75,6 @@ module.exports = function () {
     const interactionId = getInteractionIdFromInteractionUri(interactionUrl)
     const { header: { location } } = await this.consent(agent, interactionId, { consentRequest })
     const code = new URL(location).searchParams.get('code')
-    console.log(code)
     const { body: { access_token: accessToken, id_token: encIdToken } } = await this.token(agent, code)
     {
       const { email, assertion_claims: assertionClaims, birthdate } = jwtVerify(encIdToken)
