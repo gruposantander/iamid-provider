@@ -1,7 +1,7 @@
 'use strict'
 
 const { it, describe } = require('mocha')
-const { deepEqual } = require('assert').strict
+const { deepEqual, throws } = require('assert').strict
 const melt = require('../lib/melt')
 
 describe('Object Melter', function () {
@@ -71,5 +71,34 @@ describe('Object Melter', function () {
     const expected = { string1, string2 }
     expected.object1 = expected
     deepEqual(melted, expected)
+  })
+
+  describe('Assertion', function () {
+    it('should return the result if the result complies with rules', function () {
+      const configuration1 = { string1 }
+      const configuration2 = { string1: string2 }
+      const rules = { string1: { $type: 'string' } }
+      const melted = melt(rules, configuration1, configuration2)
+      deepEqual(melted, configuration2)
+    })
+
+    it('should throw an error if result does not comply with the rules', function () {
+      const configuration1 = { string1 }
+      const configuration2 = { string1: 1 }
+      const rules = { string1: { $type: 'string' } }
+      throws(() => melt(rules, configuration1, configuration2), {
+        name: 'AssertionError',
+        message: '$.string1 must be a string'
+      })
+    })
+
+    it('should require every field at rules by default', function () {
+      const configuration1 = {}
+      const rules = { string1: { $type: 'string' } }
+      throws(() => melt(rules, configuration1, configuration1), {
+        name: 'AssertionError',
+        message: '$.string1 is required'
+      })
+    })
   })
 })
