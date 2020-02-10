@@ -1,7 +1,7 @@
 'use strict'
 
 const { describe, before, after, afterEach } = require('mocha')
-const IAmId = require('../../lib/app')
+const { IAmId, Configuration } = require('../../')
 const request = require('supertest')
 const sinon = require('sinon')
 const { MongoMemoryServer } = require('mongodb-memory-server')
@@ -33,7 +33,10 @@ const suite = function () {
   before('instance and stubs', async function () {
     const resolve = sinon.stub()
     const login = sinon.stub()
-    this.app = new IAmId(this.environment, this.secrets)
+    this.app = new IAmId(Configuration.newInstance()
+      .pushEnvironment(this.environment)
+      .pushSecrets(this.secrets)
+      .build())
     this.app.use(new InteractionRouter(this.app, login, resolve).routes())
 
     await this.app.init()
