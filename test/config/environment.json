@@ -3,5 +3,34 @@
     "enabled": true,
     "salt": "banana",
     "list": ["84e658cf26917bf442bb7a83174697d28fdd94d70266dc8b79530f85663014a7"]
-  }
+  },
+  "postLogoutRedirectURI": "https://www.santander.co.uk",
+  "customAuthorizationEndpoint": "https://verifiedid-nginx-spa-verifiedid-pro.e4ff.pro-eu-west-1.openshiftapps.com",
+  "discovery": {
+    "claims_in_assertion_claims_supported": {
+      "total_balance": { "type": "object", "properties": { "amount": { "type": "decimal" }, "currency": { "type": "string" } } },
+      "phone_number": { "type": "phone_number" },
+      "email": { "type": "string" },
+      "birthdate": { "type": "date" },
+      "family_name": { "type": "string" },
+      "given_name": { "type": "string" }
+    }
+  },
+  "claims": {
+    "assertion_claims": null,
+    "total_balance": null,
+    "phone_number": null,
+    "email": null,
+    "birthdate": null,
+    "family_name": null,
+    "given_name": null
+  },
+  "masks": {
+    "email": { "type": "email" },
+    "phone_number": { "type": "slice", "args": { "prefix": "******", "begin": -4 } },
+    "given_name": { "type": "fill", "args": { "begin": 2, "end": -2, "filling": "****" } },
+    "family_name": { "type": "fill", "args": { "begin": 2, "end": -2, "filling": "****" } }
+  },
+  "pushedRequestURN": "urn:op.example:",
+  "issuer": "https://op.example.com"
 }
