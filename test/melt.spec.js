@@ -92,6 +92,16 @@ describe('Object Melter', function () {
       })
     })
 
+    it('should throw an error if result does not comply with the rules (deep)', function () {
+      const configuration1 = { object1: { string1 } }
+      const configuration2 = { object1: { string1: 1 } }
+      const rules = { object1: { string1: { $type: 'string' } } }
+      throws(() => melt(rules, configuration1, configuration2), {
+        name: 'AssertionError',
+        message: '$.object1.string1 must be a string'
+      })
+    })
+
     it('should require every field at rules by default', function () {
       const configuration1 = {}
       const rules = { string1: { $type: 'string' } }
