@@ -43,6 +43,7 @@ module.exports = function () {
     it('should support schemas', function () {
       check(['123.00', '123', '123.01'], { $eq: '123.0' }, ['123.00', '123'], { type: 'decimal' })
       check(['1979-04-04', '1982-02-01'], { $eq: '1979-04-04' }, ['1979-04-04'], { type: 'date' })
+      check([12, 13], { $eq: 12 }, [12], { type: 'number' })
     })
   })
   describe('$gt operator', function () {
@@ -59,6 +60,7 @@ module.exports = function () {
       check(['123.00'], { $gt: '1100' }, [], { type: 'decimal' })
       check(['1979-04-04'], { $gt: '1970-01-01' }, ['1979-04-04'], { type: 'date' })
       check(['1979-04-04'], { $gt: '2000-01-01' }, [], { type: 'date' })
+      check([12, 13], { $gt: 12 }, [13], { type: 'number' })
     })
   })
   describe('$lt operator', function () {
@@ -75,6 +77,7 @@ module.exports = function () {
       check(['123.00'], { $lt: '5' }, [], { type: 'decimal' })
       check(['1979-04-04'], { $lt: '2000-01-01' }, ['1979-04-04'], { type: 'date' })
       check(['1979-04-04'], { $lt: '1970-01-01' }, [], { type: 'date' })
+      check([12, 13], { $lt: 13 }, [12], { type: 'number' })
     })
   })
 
@@ -93,6 +96,7 @@ module.exports = function () {
       check(['123.00'], { $gte: '1100' }, [], { type: 'decimal' })
       check(['1979-04-04'], { $gte: '1970-01-01' }, ['1979-04-04'], { type: 'date' })
       check(['1979-04-04'], { $gte: '2000-01-01' }, [], { type: 'date' })
+      check([11, 12, 13], { $gte: 12 }, [12, 13], { type: 'number' })
     })
   })
   describe('$lte operator', function () {
@@ -110,6 +114,7 @@ module.exports = function () {
       check(['123.00'], { $lte: '5' }, [], { type: 'decimal' })
       check(['1979-04-04'], { $lte: '2000-01-01' }, ['1979-04-04'], { type: 'date' })
       check(['1979-04-04'], { $lte: '1970-01-01' }, [], { type: 'date' })
+      check([11, 12, 13], { $lte: 12 }, [11, 12], { type: 'number' })
     })
   })
 
