@@ -117,7 +117,7 @@ describe('Object Melter', function () {
       })
     })
 
-    it('should throw an error if result does not comply with the rules (deep)', function () {
+    it('should throw an error if result does not comply with the rules', function () {
       const cfg1 = { object1: { string1 } }
       const cfg2 = { object1: { string1: 1 } }
       const rules = { object1: { string1: { $type: 'string' } } }
@@ -125,10 +125,6 @@ describe('Object Melter', function () {
         name: 'AssertionError',
         message: '$.object1.string1 must be a string'
       })
-    })
-
-    it('should support different types', function () {
-      const cfg1 = { string1 }
     })
 
     it('should require every field at rules by default', function () {
