@@ -76,6 +76,13 @@
       "$gte",
       "$lte"
     ],
+    "number": [
+      "$eq",
+      "$gt",
+      "$lt",
+      "$gte",
+      "$lte"
+    ],
     "object": [],
     "phone_number": [
       "$eq"
