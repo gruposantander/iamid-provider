@@ -1,7 +1,7 @@
 'use strict'
 
 const { describe, before, after, afterEach } = require('mocha')
-const { IAmId, Configuration } = require('../../')
+const { IAmId, Configuration, Repositories } = require('../../')
 const request = require('supertest')
 const sinon = require('sinon')
 const { MongoMemoryServer } = require('mongodb-memory-server')
@@ -33,11 +33,13 @@ const suite = function () {
   before('instance and stubs', async function () {
     const resolve = sinon.stub()
     const login = sinon.stub()
-    this.app = new IAmId(Configuration.newInstance()
+    const configuration = Configuration.newInstance()
       .pushEnvironment(this.environment)
       .pushSecrets(this.secrets)
-      .build())
-    this.app.use(new InteractionRouter(this.app, login, resolve).routes())
+      .build()
+    this.repositories = new Repositories(configuration.repositories)
+    this.app = new IAmId(configuration, this.repositories)
+    this.app.use(new InteractionRouter(this.app, login, this.repositories, resolve).routes())
 
     await this.app.init()
     this.claimStub = resolve
@@ -158,7 +160,7 @@ const suite = function () {
 
   afterEach('clean consent repository', async function () {
     // TODO this is not going to be needed when every consent has its own id
-    (await this.app.repositories.getRepository('consents')).clear()
+    (await this.repositories.getRepository('consents')).clear()
   })
 
   describe('Wellknown Endpoints', require('./well-known-endpoints.spec'))

@@ -34,7 +34,7 @@ module.exports = function () {
   })
   describe('Users (repository)', function () {
     before('Setup Adapter', function () {
-      this.users = new Users(this.app.repositories)
+      this.users = new Users(this.repositories)
     })
     it('should save and retrieve from adapter correctly', async function () {
       const connection = new Connection(SYSTEM_ID, USER_ID, AUTH_DATA)
@@ -61,7 +61,7 @@ module.exports = function () {
       equal(user.connections.length, 1)
     })
     afterEach('clean consent repository', async function () {
-      (await this.app.repositories.getRepository(Users.getRepoName())).clear()
+      (await this.repositories.getRepository(Users.getRepoName())).clear()
     })
   })
 }

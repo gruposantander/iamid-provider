@@ -13,7 +13,7 @@ module.exports = function () {
       if (this.mongo) {
         const { dbName } = this.mongo.instanceInfoSync
         const { 'default-mongodb-indexes': def, [name + '-mongodb-indexes']: cfgIndex = def } = indexConfig
-        const repository = await this.app.repositories.getRepository(name)
+        const repository = await this.repositories.getRepository(name)
         const indexes = await repository._collection.indexes()
         const common = { v: 2, ns: `${dbName}.${name}` }
         const withCommon = cfgIndex.map((obj) => { return { ...obj, ...common } })
