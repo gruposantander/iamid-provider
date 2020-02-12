@@ -18,11 +18,11 @@ class UnauthorizedContextError extends HTTPError {
 }
 
 class SantanderUKInteractionRouter extends IAmIdRouter {
-  constructor (app, login, repositories, resolver) {
-    super(app, repositories, resolver)
+  constructor (configuration, login, repositories, resolver) {
+    super(configuration, repositories, resolver)
 
     // As we already have in configuration we get from there
-    const INTERACTION_PATH = app.configuration.routes.interaction
+    const INTERACTION_PATH = configuration.routes.interaction
     const self = this
 
     /**

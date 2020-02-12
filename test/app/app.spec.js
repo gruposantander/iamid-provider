@@ -38,10 +38,9 @@ const suite = function () {
       .pushSecrets(this.secrets)
       .build()
     this.repositories = new Repositories(configuration.repositories)
-    this.app = new IAmId(configuration, this.repositories)
-    this.app.use(new InteractionRouter(this.app, login, this.repositories, resolve).routes())
+    const router = new InteractionRouter(configuration, login, this.repositories, resolve)
+    this.app = new IAmId(configuration, router, this.repositories)
 
-    await this.app.init()
     this.claimStub = resolve
     this.loginStub = login
   })
