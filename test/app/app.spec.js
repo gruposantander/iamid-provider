@@ -31,18 +31,15 @@ const handler = {
 
 const suite = function () {
   before('instance and stubs', async function () {
-    const resolve = sinon.stub()
-    const login = sinon.stub()
+    this.claimStub = sinon.stub()
+    this.loginStub = sinon.stub()
     const configuration = Configuration.newInstance()
       .pushEnvironment(this.environment)
       .pushSecrets(this.secrets)
       .build()
     this.repositories = new Repositories(configuration.repositories)
-    const router = new InteractionRouter(configuration, login, this.repositories, resolve)
+    const router = new InteractionRouter(configuration, this.loginStub, this.repositories, this.claimStub)
     this.app = new IAmId(configuration, router, this.repositories)
-
-    this.claimStub = resolve
-    this.loginStub = login
   })
 
   afterEach('reset stubs', function () {
