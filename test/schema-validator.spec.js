@@ -6,7 +6,7 @@ const { validate } = require('../lib/schema-validator')
 
 // TODO nullable fields, description and documentation for errors, example values for fields
 
-describe('Schema Validator', function () {
+describe.only('Schema Validator', function () {
   const number1 = 1
   const string1 = 'string-1'
   const string2 = 'string-2'
@@ -68,12 +68,28 @@ describe('Schema Validator', function () {
     })
   })
 
+  it('should forbid null by default', function () {
+    const data = { object: null }
+    const schema = { properties: { object: { type: 'object' } } }
+    throws(() => validate(schema, data), {
+      name: 'AssertionError',
+      message: '$.object is not nullable'
+    })
+  })
+
+  it('should allow null when nullable is true', function () {
+    const data = { object: {} }
+    const schema = { properties: { object: { type: 'object' } } }
+    validate(schema, data)
+  })
+
   it('should allow validation of arbitrary object children', function () {
     const data1 = { object1: { key1: string1, key2: string2 } }
     const data2 = { object1: { key1: string1, key2: number1 } }
     const schema = { properties: { object1: { children: { type: 'string' } } } }
     validate(schema, data1)
     throws(() => validate(schema, data2), {
+      name: 'AssertionError',
       message: '$.object1.key2 must be a string'
     })
   })
