@@ -24,4 +24,13 @@ module.exports = function () {
       }
     })
   })
+  it('should store and query dates without loosing the type (TTL bug)', async function () {
+    const repository = await this.repositories.getRepository('dummy')
+    const date = new Date()
+    const id = 'id'
+    const expected = Object.freeze({ id, date })
+    await repository.save(expected)
+    const actual = await repository.findById(id)
+    deepEqual(actual, expected)
+  })
 }
