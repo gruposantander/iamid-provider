@@ -68,7 +68,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm i && npm test"
+      "pre-push": "npm i && npm test"
     }
   },
   "publishConfig": {
