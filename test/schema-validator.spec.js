@@ -6,7 +6,7 @@ const { validate } = require('../lib/schema-validator')
 
 // TODO nullable fields, description and documentation for errors, example values for fields
 
-describe.only('Schema Validator', function () {
+describe('Schema Validator', function () {
   const number1 = 1
   const string1 = 'string-1'
   const string2 = 'string-2'
@@ -22,11 +22,13 @@ describe.only('Schema Validator', function () {
     const data2 = { data: number1 }
     const data3 = { data: {} }
     const data4 = { data: [] }
+    const data5 = { data: true }
 
     const schema1 = { properties: { data: { type: 'string' } } }
     const schema2 = { properties: { data: { type: 'number' } } }
     const schema3 = { properties: { data: { type: 'object' } } }
     const schema4 = { properties: { data: { type: 'array' } } }
+    const schema5 = { properties: { data: { type: 'boolean' } } }
 
     validate(schema2, data2)
     throws(() => validate(schema1, data2), { message: '$.data must be a string' })
@@ -39,6 +41,9 @@ describe.only('Schema Validator', function () {
 
     validate(schema4, data4)
     throws(() => validate(schema4, data3), { message: '$.data must be an array' })
+
+    validate(schema5, data5)
+    throws(() => validate(schema5, data1), { message: '$.data must be a boolean' })
   })
 
   it('should throw an error if the type is not supported', function () {
