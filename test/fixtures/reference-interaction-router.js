@@ -1,8 +1,7 @@
 'use strict'
 
-const { IAmIdRouter, resolvers: { UnauthorizedError } } = require('../..')
+const { resolvers: { UnauthorizedError }, utils: { HTTPError } } = require('../..')
 const Router = require('koa-router')
-const { HTTPError } = IAmIdRouter
 
 class CredentialValidationError extends HTTPError {
   constructor (context) {
