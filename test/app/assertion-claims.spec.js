@@ -11,7 +11,7 @@ const assert = require('assert')
 const { deepStrictEqual } = assert
 
 module.exports = function () {
-  it.only('should be an accepted claim', async function () {
+  it('should be an accepted claim', async function () {
     const agent = this.agent()
     const purpose = 'some text'
     const claims = {
