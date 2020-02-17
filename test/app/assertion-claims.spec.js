@@ -11,16 +11,16 @@ const assert = require('assert')
 const { deepStrictEqual } = assert
 
 module.exports = function () {
-  it('should be an accepted claim', async function () {
+  it.only('should be an accepted claim', async function () {
     const agent = this.agent()
     const purpose = 'some text'
     const claims = {
       id_token: {
         assertion_claims: {
-          given_name: { purpose, assertion: { $eq: 'José' } },
-          birthdate: { assertion: { $lt: '2000-01-10' } },
+          given_name: { essential: false, purpose, assertion: { $eq: 'José' } },
+          birthdate: { essential: true, assertion: { $lt: '2000-01-10' } },
           phone_number: { assertion: { $eq: '07523-503388' } },
-          total_balance: { assertion: { amount: { $gt: '999.00' } } }
+          total_balance: { essential: true, assertion: { amount: { $gt: '999.00' } } }
         }
       }
     }
@@ -37,10 +37,11 @@ module.exports = function () {
       claims: {
         id_token: {
           assertion_claims: {
-            given_name: { ial: 1, purpose, assertion: { $eq: 'José' }, result: ['Jo****sé'], unresolved: [] },
-            birthdate: { ial: 1, assertion: { $lt: '2000-01-10' }, result: ['1979-08-18'], unresolved: [] },
+            given_name: { essential: false, ial: 1, purpose, assertion: { $eq: 'José' }, result: ['Jo****sé'], unresolved: [] },
+            birthdate: { essential: true, ial: 1, assertion: { $lt: '2000-01-10' }, result: ['1979-08-18'], unresolved: [] },
             phone_number: { ial: 1, assertion: { $eq: '07523-503388' }, result: ['******3388'], unresolved: [] },
             total_balance: {
+              essential: true,
               ial: 1,
               assertion: { amount: { $gt: '999.00' } },
               result: [{ currency: 'GBP', amount: '1002.00' }],
