@@ -38,8 +38,8 @@ const suite = function () {
       .pushSecrets(this.secrets)
       .build()
     this.repositories = new Repositories(configuration.repositories)
-    const router = new InteractionRouter(configuration, this.loginStub, this.repositories, this.claimStub)
-    this.app = new IAmId(configuration, router, this.repositories)
+    const router = new InteractionRouter(this.loginStub)
+    this.app = new IAmId(configuration, router, this.repositories, this.claimStub)
   })
 
   afterEach('reset stubs', function () {

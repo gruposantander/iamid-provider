@@ -1,6 +1,7 @@
 'use strict'
 
 const { IAmIdRouter, resolvers: { UnauthorizedError } } = require('../..')
+const Router = require('koa-router')
 const { HTTPError } = IAmIdRouter
 
 class CredentialValidationError extends HTTPError {
@@ -17,13 +18,9 @@ class UnauthorizedContextError extends HTTPError {
   }
 }
 
-class SantanderUKInteractionRouter extends IAmIdRouter {
-  constructor (configuration, login, repositories, resolver) {
-    super(configuration, repositories, resolver)
-
-    // As we already have in configuration we get from there
-    const INTERACTION_PATH = configuration.routes.interaction
-    const self = this
+class SantanderUKInteractionRouter extends Router {
+  constructor (login) {
+    super()
 
     /**
      * Login endpoint execute the login of the user against minibank system
@@ -47,7 +44,7 @@ class SantanderUKInteractionRouter extends IAmIdRouter {
         }
         throw err
       }
-      await self.processLogin(userId, ctx, next)
+      await ctx.iamid.processLogin(userId, ctx, next)
     }
 
     /**
@@ -55,12 +52,12 @@ class SantanderUKInteractionRouter extends IAmIdRouter {
      * @param {string} session_id uid of the authorization session
      */
     async function consentHandler (ctx, next) {
-      await self.processConsent(ctx.request.body, ctx, next)
+      await ctx.iamid.processConsent(ctx.request.body, ctx, next)
     }
 
     this
-      .post(INTERACTION_PATH + '/:interactionId/login', loginHandler)
-      .post(INTERACTION_PATH + '/:interactionId/consent', consentHandler)
+      .post('/login', loginHandler)
+      .post('/consent', consentHandler)
   }
 }
 
