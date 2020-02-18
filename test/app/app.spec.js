@@ -150,8 +150,8 @@ const suite = function () {
   })
 
   after('Stop server', function (cb) {
+    this.repositories.close()
     this.server.close(cb)
-    this.app.close()
   })
 
   afterEach('clean consent repository', async function () {
