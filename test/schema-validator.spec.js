@@ -88,6 +88,17 @@ describe('Schema Validator', function () {
     validate(schema, data)
   })
 
+  it.skip('should throw when an object has unknown properties', function () {
+    const data = { string1, string2 }
+    const schema1 = { properties: { string1: { type: 'string' }, string2: { type: 'string' } } }
+    const schema2 = { properties: { string1: { type: 'string' } } }
+    validate(schema1, data)
+    throws(() => { validate(schema2, data) }, {
+      name: 'AssertionError',
+      message: '$ has an unknown property string2'
+    })
+  })
+
   it('should allow validation of arbitrary object children', function () {
     const data1 = { object1: { key1: string1, key2: string2 } }
     const data2 = { object1: { key1: string1, key2: number1 } }
