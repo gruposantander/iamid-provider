@@ -85,4 +85,15 @@ module.exports = function () {
     const expected = new ClaimResponse({ key1: new Claim([], [Unresolved.notFound()]) })
     deepEqual(actual, expected)
   })
+
+  it('should return "internal_error" if a resolver fail when getting claims', async function () {
+    async function resolverA () {
+      throw new Error('Error obtaining the claims')
+    }
+    resolverA.claims = { key1: { ial: 1 } }
+    const proxy = proxyResolvers(resolverA)
+    const actual = await proxy(AUTH, { key1: { ials: [1] } })
+    const expected = new ClaimResponse({ key1: new Claim([], [Unresolved.internalError()]) })
+    deepEqual(actual, expected)
+  })
 }
