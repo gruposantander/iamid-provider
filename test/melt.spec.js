@@ -81,4 +81,10 @@ describe('Object Melter', function () {
       message: '$.data type "banana" is not supported'
     })
   })
+
+  it('should allow optional schema', function () {
+    const data1 = { data: string1 }
+    const schema1 = undefined
+    deepEqual(melt(schema1, data1, data1), data1)
+  })
 })

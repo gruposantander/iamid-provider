@@ -1,31 +1,12 @@
 = ToDo
 
-* IAmId should start the server
-
-== IAL
-
-* Test that every claim request in different sections filter by ial
-* Remove sensitive class and use Resolved class only
-
 == Backlog
 
-* Launch all events from a single point, All events should be emitted by app
+* Remove sensitive class and use Resolved class only
+* IAmId should start the server
 * Unauthorized test: see coverage
-* Test compile method in assertion lang specs
 * Create our own ESLint config (extending standard???)
 
 == Clean Up
 
-* System text are obsolete: remove or update
 * Review Jenkins files
-
-== Docs
-
-* In connectors change the way we call connectors because should be done using a resolve() method and a proxy? we should review this because is not very easy to explain or use...
-* Should we describe events emitted or we wait for the implementation of functional events and this things??
-* In IamIdRouter in library api we should also add the HTTPError description
-* Look for IamId and replace with iamid-provider
-* In endpoint doc in == Login endpoint probably the contract change a lot after acr and more features.
-* In connectors describe more about resolved or not resolved and the arrays.
-* When public describe repositories here.
-

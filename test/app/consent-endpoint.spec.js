@@ -72,7 +72,6 @@ module.exports = function () {
             unresolved: { custard_apple: {} },
             ...body
           }).expect(302)
-        // TODO check in database
       })
 
       it('should fail if the current interaction is not waiting for a consent', async function () {

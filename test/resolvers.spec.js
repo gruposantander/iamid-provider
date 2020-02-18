@@ -12,9 +12,9 @@ module.exports = function () {
   }
 
   it('should provide a proxy that exposes a proper reduction of claims supported', function () {
-    const resolverA = { claims: { key1: { ial: 1 }, key2: { ial: 1 } } }
-    const resolverB = { claims: { key1: { ial: 2 }, key2: { ial: 1 }, key3: { ial: 1 } } }
-    const resolverC = { claims: { key2: { ial: 3 } } }
+    const resolverA = { claims: { key1: { ial: 1 }, key2: { ial: 2 } } }
+    const resolverB = { claims: { key1: { ial: 2 }, key2: { ial: 3 }, key3: { ial: 1 } } }
+    const resolverC = { claims: { key2: { ial: 1 } } }
     const proxy = proxyResolvers(resolverA, resolverB, resolverC)
     deepEqual(proxy.claims, { key1: { ial: 2 }, key2: { ial: 3 }, key3: { ial: 1 } })
   })

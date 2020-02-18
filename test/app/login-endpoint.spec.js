@@ -4,7 +4,7 @@ const { describe, it, before, after } = require('mocha')
 const sinon = require('sinon')
 const {
   error, getInteractionIdFromInteractionUri,
-  USER, PASS, AUTH, LOGIN_PATH, INTERACTION_PATH
+  USER, PASS, LOGIN_PATH, INTERACTION_PATH
 } = require('./fixtures')
 const { UnauthorizedError } = require('../../lib/resolvers')
 const assert = require('assert')
@@ -43,33 +43,6 @@ module.exports = function () {
       .expect(400, error('invalid_request', 'Unexpected token < in JSON at position 22'))
   })
 
-  it('should fail if "user" field is missing', async function () {
-    const agent = this.agent()
-    const interactionId = await this.goToLogin(agent)
-
-    await agent.post(INTERACTION_PATH + interactionId + LOGIN_PATH)
-      .send({ pass: PASS })
-      .expect(400, error('invalid_request', 'authentication fail'))
-  })
-
-  it('should fail if "pass" field is missing', async function () {
-    const agent = this.agent()
-    const interactionId = await this.goToLogin(agent)
-    await agent.post(INTERACTION_PATH + interactionId + LOGIN_PATH)
-      .send({ user: USER })
-      .expect(400, error('invalid_request', 'authentication fail'))
-  })
-
-  it('should ignore additional fields in the request body', async function () {
-    const agent = this.agent()
-    const interactionId = await this.goToLogin(agent)
-
-    this.loginStub.resolves(AUTH)
-    await agent.post(INTERACTION_PATH + interactionId + LOGIN_PATH)
-      .send({ user: USER, pass: PASS, additional: 'wrong' })
-      .expect(302)
-  })
-
   it('should return an error if authentication fails', async function () {
     const agent = this.agent()
     const interactionId = await this.goToLogin(agent)
@@ -87,6 +60,7 @@ module.exports = function () {
     await this.login(agent, interactionId)
     await this.login(agent, interactionId)
   })
+
   describe('Interaction Session Longer Than User Session', function () {
     before('set up fake timers', function () {
       this.clock = sinon.useFakeTimers()
