@@ -2,7 +2,8 @@
 
 const { it } = require('mocha')
 const { proxyResolvers, ClaimResponse, Claim, Resolved, Unresolved } = require('../lib/resolvers')
-const { deepEqual, equal, fail } = require('assert').strict
+const { deepEqual, equal, ok } = require('assert').strict
+const sinon = require('sinon')
 
 module.exports = function () {
   const AUTH = 'auth'
@@ -76,14 +77,13 @@ module.exports = function () {
   })
 
   it('should return unresolved if a request claim is filtered out (low ial on config)', async function () {
-    async function resolverA () {
-      fail('no call')
-    }
+    const resolverA = sinon.spy()
     resolverA.claims = { key1: { ial: 2 } }
     const proxy = proxyResolvers(resolverA)
     const actual = await proxy(AUTH, { key1: { ials: [3] } })
     const expected = new ClaimResponse({ key1: new Claim([], [Unresolved.notFound()]) })
     deepEqual(actual, expected)
+    ok(resolverA.notCalled)
   })
 
   it('should return "internal_error" if a resolver fail when getting claims', async function () {
