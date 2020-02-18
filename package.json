@@ -37,19 +37,19 @@
     "koa-helmet": "^5.2.0",
     "koa-mount": "^4.0.0",
     "koa-router": "^7.4.0",
-    "log4js": "^6.1.0",
-    "mongodb": "^3.5.1",
-    "nanoid": "^2.1.10"
+    "log4js": "^6.1.2",
+    "mongodb": "^3.5.3",
+    "nanoid": "^2.1.11"
   },
   "devDependencies": {
+    "husky": "^4.2.3",
     "jsonwebtoken": "^8.5.1",
-    "husky": "^4.0.10",
-    "mocha": "^7.0.0",
-    "mongodb-memory-server": "^6.2.3",
+    "mocha": "^7.0.1",
+    "mongodb-memory-server": "^6.2.4",
     "nyc": "^15.0.0",
     "pkce-challenge": "^2.0.0",
-    "set-cookie-parser": "^2.4.0",
-    "sinon": "^8.1.0",
+    "set-cookie-parser": "^2.4.3",
+    "sinon": "^8.1.1",
     "standard": "^14.3.1",
     "supertest": "^4.0.2"
   },
