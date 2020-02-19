@@ -5,8 +5,8 @@ const { IAmId, Configuration, Repositories } = require('../../')
 const request = require('supertest')
 const sinon = require('sinon')
 const { MongoMemoryServer } = require('mongodb-memory-server')
-
 const InteractionRouter = require('../fixtures/reference-interaction-router')
+const { ok } = require('assert').strict
 
 const {
   jwtSign, AUTH_PATH,
@@ -18,14 +18,12 @@ const {
 const handler = {
   get: function (target, propertyName) {
     const property = target[propertyName]
-    if (propertyName === 'post' || propertyName === 'get') {
-      return function () {
-        return property.call(target, ...arguments)
-          .set('X-Forwarded-Host', 'myid.io')
-          .set('X-Forwarded-Proto', 'https')
-      }
+    ok(propertyName === 'post' || propertyName === 'get', 'only get and post are supported')
+    return function () {
+      return property.call(target, ...arguments)
+        .set('X-Forwarded-Host', 'myid.io')
+        .set('X-Forwarded-Proto', 'https')
     }
-    return property
   }
 }
 
@@ -156,7 +154,8 @@ const suite = function () {
 
   afterEach('clean consent repository', async function () {
     // TODO this is not going to be needed when every consent has its own id
-    (await this.repositories.getRepository('consents')).clear()
+    const repository = await this.repositories.getRepository('consents')
+    await repository.clear()
   })
 
   describe('Wellknown Endpoints', require('./well-known-endpoints.spec'))
