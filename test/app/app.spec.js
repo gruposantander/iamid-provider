@@ -11,8 +11,9 @@ const { ok } = require('assert').strict
 const {
   jwtSign, AUTH_PATH,
   RESOLVED_CLAIMS, CLIENT_ASSERTION_TYPE, CONSENT_PATH,
-  AUTH, USER, PASS, INTERACTION_PATH, REDIRECT_URI, CLIENT_ID,
-  LOGIN_PATH, PAYLOAD_AUTH, TOKEN_PATH, REQUEST_WITH_CLAIMS, INIT_PATH
+  AUTH, USER, PASS, INTERACTION_PATH, REDIRECT_URI, CLIENT_ID, LOGOUT_PATH,
+  ABORT_PATH, LOGIN_PATH, PAYLOAD_AUTH, TOKEN_PATH, REQUEST_WITH_CLAIMS, INIT_PATH,
+  getInteractionIdFromInteractionUri
 } = require('./fixtures')
 
 const handler = {
@@ -61,19 +62,19 @@ const suite = function () {
   })
 
   before('Set utility methods', function () {
-    this.initiateAuthorizeWithSigns = (agent, assertion, request) => {
+    this.initiateAuthorizeWithSigns = (agent, assertion, request, status = 201) => {
       return agent.post(INIT_PATH)
         .send(`client_assertion_type=${CLIENT_ASSERTION_TYPE}`)
         .send(`client_assertion=${assertion}`)
         .send(`request=${request}`)
-        .expect(201)
+        .expect(status)
     }
 
-    this.initiateAuthorize = (agent, options = {}) => {
+    this.initiateAuthorize = (agent, options = {}, status) => {
       const { requestObject = REQUEST_WITH_CLAIMS, clientAssertionObject = PAYLOAD_AUTH } = options
       const jwtSec = jwtSign(clientAssertionObject)
       const jwtRequest = jwtSign(requestObject)
-      return this.initiateAuthorizeWithSigns(agent, jwtSec, jwtRequest)
+      return this.initiateAuthorizeWithSigns(agent, jwtSec, jwtRequest, status)
     }
     this.authorize = (agent, requestUri, options = {}) => {
       const { clientId = CLIENT_ID } = options
@@ -95,6 +96,11 @@ const suite = function () {
         .send(consentRequest)
         .expect(302)
     }
+
+    this.abort = (agent, interactionURI) => agent
+      .post(INTERACTION_PATH + getInteractionIdFromInteractionUri(interactionURI) + ABORT_PATH)
+      .expect(302)
+
     this.goToInteraction = async (agent, options) => {
       const { body: { request_uri: requestURI } } = await this.initiateAuthorize(agent, options)
       const { header: { location: interactionURI } } = await this.authorize(agent, requestURI, options)
@@ -112,17 +118,22 @@ const suite = function () {
         .send({ user: USER, pass: PASS })
         .expect(302)
     }
+
     this.goToSecondInteraction = async (agent, options) => {
       const interactionId = await this.goToLogin(agent, options)
       const { header: { location: interactionURI } } = await this.login(agent, interactionId)
       return interactionURI
     }
+
+    this.logout = (agent) => agent.post(LOGOUT_PATH).expect(302)
+
     this.secondInteraction = (agent, interactionURI, options = {}) => {
       const { resolvedClaims = RESOLVED_CLAIMS } = options
       this.claimStub.resolves(resolvedClaims)
       // TODO test if this is really is the second interaction
       return this.interaction(agent, interactionURI)
     }
+
     this.goToConsent = async (agent, options) => {
       const interactionURI = await this.goToSecondInteraction(agent, options)
       const { body: { interaction_id: interactionId } } = await this.secondInteraction(agent, interactionURI, options)
@@ -133,7 +144,7 @@ const suite = function () {
       const { header: { location } } = await this.consent(agent, interactionId, options)
       return new URL(location).searchParams.get('code')
     }
-    this.token = (agent, code) => {
+    this.token = (agent, code, status = 200) => {
       const jwtSec = jwtSign(PAYLOAD_AUTH)
       return agent.post(TOKEN_PATH)
         .send(`client_assertion_type=${CLIENT_ASSERTION_TYPE}`)
@@ -141,8 +152,14 @@ const suite = function () {
         .send(`code=${code}`)
         .send('grant_type=authorization_code')
         .send(`redirect_uri=${REDIRECT_URI}`)
-        .expect(200)
+        .expect(status)
     }
+    this.goToUserinfo = async (agent, options) => {
+      const code = await this.goToToken(agent, options)
+      const response = await this.token(agent, code)
+      return response.body.access_token
+    }
+
     this.userinfo = (agent, accessToken) =>
       agent.get('/me').set('Authorization', 'Bearer ' + accessToken).expect(200)
   })
@@ -175,6 +192,7 @@ const suite = function () {
   describe('Users Domain', require('./users.spec'))
   describe('Repositories', require('./repositories.spec'))
   describe('IAL Flow', require('./ial.spec'))
+  describe('App. Events', require('./events.spec'))
 }
 
 module.exports = function () {

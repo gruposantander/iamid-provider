@@ -18,7 +18,6 @@ module.exports = function () {
     const interactionId = await this.goToConsent(agent)
 
     const { header: { location, 'set-cookie': cookiesArray } } = await agent.post(INTERACTION_PATH + interactionId + ABORT_PATH)
-      .send(SEND_BODY)
       .expect(302)
 
     const cookies = cookieParser.parse(cookiesArray)
