@@ -1,28 +1,26 @@
 = Endpoints
 
-`iamid-provider` code don't contain a default implementation for the interactions endpoints login and consent, the is because this interactions process can contain very different steps depending of the specific requirements of the OP server, so is responsibility of the OP developer to implement this endpoints in the Koa router.
+`iamid-provider` code doesn't contain a default implementation for the interactions endpoints login and consent, this is because the interactions process can contain very different steps depending of the specific requirements for the OP server, so it's responsibility of the OP developer to implement the endpoints in the Koa router.
 
-To help development `iamid-provider` provide a class `IAmIdRouter` and service methods to pass information to the `iamid-provider` framework.
+The way to implement this endpoints is creating a https://github.com/koajs/router[koa-router]
 
-== Adding new endpoints to IAmIdRouter
+== Creating a koa-router
 
-`IAmIdRouter` is an extension of https://github.com/ZijianHe/koa-router[koa-router] so to add new routes is as easy as extending the class and adding routes in the constructor, as an example to add a login and consent endpoint:
+`IamId` app is a Koa app and to implement the endpoints of interaction is needed to create a https://github.com/koajs/router[koa-router], this is the official implementation of a router for koa, as an example to add a login and consent endpoint:
 
 [source,js]
 ----
-const { IAmIdRouter } = require('@santander/iamid-provider')
+const Router = require('koa-router')
 
-class CustomRouter extends IAmIdRouter {
-  constructor (app, connector) {
-    super(app, connector)
-
-    const INTERACTION_PATH = app.configuration.routes.interaction
+class CustomRouter extends extends Router {
+  constructor (login) {
+    super()
 
     ... // Omitted concretely implementation
 
     this
-      .post(INTERACTION_PATH + '/:interactionId/login', login)
-      .post(INTERACTION_PATH + '/:interactionId/consent', consent)
+      .post('/login', loginHandler)
+      .post('/consent', consentHandler)
   }
 }
 ----
@@ -32,9 +30,19 @@ class CustomRouter extends IAmIdRouter {
 [source,js]
 ----
   this
-    .post(INTERACTION_PATH + '/:interactionId/login/step1', login1)
-    .post(INTERACTION_PATH + '/:interactionId/login/step2', login2)
-    .post(INTERACTION_PATH + '/:interactionId/consent', consent)
+    .post('/login/step1', login1)
+    .post('/login/step2', login2)
+    .post('/consent', consent)
+----
+
+Take into account that all this routes will be exposed under the path that is setup for interaction route in configuration (see <<config.adoc#,configurtaion 'routes'>> for more info) so for example with the default config this routes will be:
+
+[source,js]
+----
+  this
+    .post('/login/step1', login1) // /interaction/:interaction_id/login/step1
+    .post('/login/step2', login2) // /interaction/:interaction_id/login/step2
+    .post('/consent', consent) // /interaction/:interaction_id/consent
 ----
 
 Is up to the OP developer to implement as many interaction endpoint as needed and synchronize this logic with the OP interface/webapp, as long as this endpoints at the end of each process communicate the result to `iamid-provider` using the services method described in next sections.
@@ -47,7 +55,13 @@ To execute the login logic a client or connector can be used to authenticate the
 
 Also task related with validate user input should be implement in this endpoint.
 
-After all the custom logic and the End User successful login into the system and authentication data is stored in `Users` repository the endpoint should call to the service method `processLogin (userId, ctx, next)` to communicate `iamid-provider` that login has finished, this will make the authorization process progress to the next prompt. As you can see the koa Context `ctx` and `next` callback are passed to the method because from this point the `IAmIdRouter` will take the control so the call to the `processLogin` method should be the last statement of our login logic.
+After custom logic, successful login into the system and store the Authentication data into `Users` repository the endpoint should call to the service method `processLogin (userId, ctx, next)` to communicate `iamid-provider` that login has finished, this will make the authorization process progress to the next prompt. The method will be exposed in the context received in the koa route, and can be called as:
+
+----
+await ctx.iamid.processLogin(userId, ctx, next)
+----
+
+As you can see the koa Context `ctx` and `next` callback are passed to the method because from this point the `iamid-provider` will take the control, so the call to the `processLogin` method should be the last statement of our login logic.
 
 An example of a login endpoint implementation can be found in this repository in link:../test/fixtures/reference-interaction-router.js[reference-interaction-router.js] file inside the `login` method.
 
@@ -55,9 +69,13 @@ After call to this method `iamid-provider` will create a session for this user (
 
 == Consent endpoint
 
-In this endpoints (or endpoints) the OP server should show clearly to the End User the list of all the claims, scopes and assertions that are being asked by the RP, the OP should ask explicitly to the user for the permission to share this information. After all the process has finished the endpoint should call to the service method `processConsent (consentData, ctx, next)` to communicate to `iamid-provider` that consent process has finished, this will make the authorization process progress to the next prompt.
+In this endpoints (or endpoints) the OP server should show clearly to the End User the list of all the claims, scopes and assertions that are being asked by the RP, the OP should ask explicitly to the user for the permission to share this information. After all the process has finished the endpoint should call to the service method `processConsent (consentData, ctx, next)` to communicate to `iamid-provider` that consent process has finished, this will make the authorization process progress to the next prompt. The method will be exposed in the context received in the koa route, and can be called as:
 
-Again as you can see the koa Context `ctx` and `next` callback are passed to the method because from this point the `IAmIdRouter` will take the control so the call to the `processConsent` method should be the last statement of our custom consent logic.
+----
+await ctx.iamid.processConsent(ctx.request.body, ctx, next)
+----
+
+Again as you can see the koa Context `ctx` and `next` callback are passed to the method because from this point the `iamid-provider` will take the control so the call to the `processConsent` method should be the last statement of our custom consent logic.
 
 The parameter `consentData` is a JSON object with the next structure:
 
