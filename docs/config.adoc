@@ -1,16 +1,18 @@
 = Configuration
+:toc:
 
-The `IamId-provider` framework need several configuration to work, because is based on https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] need some configuration for this framework, most of config values are already fixed in the `IamId-provider` please see <<'Fixed configuration'>> section for more info, the rest of the values should be provided by the developer on startup.
+`IamId-provider` framework need some configuration to work, one of the reasons is because is based on https://github.com/panva/node-oidc-provider/blob/master/docs/README.md[oidc-provider] and allow to personalize the behavior using several configurations.
 
-The first thing to highlight is that configuration is split in two types, and at the time to create the `IamId` instance should be pass as different parameters in the constructor (you can see the examples in <<library.adoc#,API docs>>).
+For the case of the config for `oidc-provider` most of config values are already fixed in the `IamId-provider`, see <<Fixed configuration>> section for more info, the rest of the values should be provided by the developer on startup.
 
-This differentiation have a reason let us see each both types:
+The first thing to highlight is that we have two different types of configuration that has different priority when merge (see more about that later), the different type of configurations are:
 
 environment::
-A JSON object containing the non sensitive data related with configuration, normally this will be stores in a config server, configmap... in the different environments.
+Contain the non sensitive data in the configuration, normally this will be stores in a config server, config-map... in the different environments.
 
 secrets::
-A JSON object containing the sensitive information needed for the server, normally this information will be stored in a more secure way as kubernetes secrets, some kind of vault... in the different environments.
+Contain the sensitive information needed for the server, normally this information will be stored in a more secure way as kubernetes secrets, some kind of vault... in the different environments.
+
 
 == Environment configuration
 
@@ -109,16 +111,37 @@ By last to define the indexes for the repo collections in mongo you just need to
 
 == Fixed configuration
 
-Some of the configuration that is provided by the https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] that this library use as base is fixed purposely because the IAMID profile has restrictive requirements and https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] implement lot of OIDC flavors. This fixed config even if is provided by the developer will be overwritten, have look to the file link:../lib/configuration/fixed.js[fixed.js] to know this values.
+Some of the configuration provided to https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] is fixed inside the `iamid-provider` code, the reason for this is because IAMID profile has restrictive requirements and https://github.com/panva/node-oidc-provider/blob/master/docs/README.md#claims[oidc-provider] implement lot of OIDC flavors. This fixed config even if is provided by the developer will be overwritten, have look to the file link:../lib/configuration/fixed.js[fixed.js] if ou want to know this values. If you think some of this values need to be configurable for some use case please open a issue to let us know.
 
 == How to provide the configuration?
 
-The way to store, manage and obtain the configuration is out of the scope of this library, you can choose to use a config-map, kubernetes secret, environment variables, a spring config server... but once obtained in your code you need to provide both config objects `secrets` and `environments` when creating the `IAmId` app as follow:
+The way to store, manage and obtain the configuration is out of the scope of this library, you can choose to use a config-map, kubernetes secret, environment variables, a spring config server... but once obtained in your code you need to provide a 'merged' configuration object when creating the `IAmId` app. To 'merge' all the configuration `iamid-provider` provide a `Configuration` class that allow you to add one or more configuration object of each type and calling the `build()` method will be merged with the default and fixed values to obtain a one merged configuration object, let us see an example of use:
 
+.Configuration object
+[source,javascript]
 ----
-const { IAmId } = require('@santander/iamid-provider')
-const app = new IAmId(environment, secrets)
+const { Configuration } = require('@santander/iamid-provider')
+
+const config = Configuration
+  .newInstance()
+  .pushSecrets(secrets)
+  .pushEnvironment(defaultEnvConfig)
+  .pushEnvironment(environment)
+  .build()
+
+const app = new IAmId(config, router, repositories, resolver)
 ----
 
-To know more in deep about how to initialize the server you can read docs on <<server.adoc#,Putting all together and starting the server>>
+In the example we provide one secret config and two environment configs, in the case of the environments config we are providing a default configuration and then the config obtained from this environment, see section <<Configuration priority/order>> for more info about config priority.
 
+Once obtained the merged config we can pass to the `IAmId` constructor as show in the example. To know more in deep about how to initialize the server you can read docs on <<server.adoc#,Putting all together and starting the server>>
+
+== Configuration priority/order
+
+The 'secret' configuration has more priority than 'environment' config, this means if the same key appear in both types the value in 'secret' overwrite the value in 'environment'.
+
+The priority of provided config is by order so if we push two environment config the second one will overwrite the values in the first one, the same for secrets.
+
+The fixed config described in <<Fixed configuration>> has the maximum priority, values in fixed will overwrite values in any configuration type (environment or secrets).
+
+The `iamid-provider` library comes with some default values that has the minimum priority, any value pass in secret or environment config will overwrite the defined default values.
