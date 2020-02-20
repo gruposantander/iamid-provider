@@ -10,7 +10,7 @@ The `Users` class is an adapter of a normal repository that add additional logic
 
 === Initialize `Users` repo
 
-To work with `Users` we need an initialize instance of the `repositories` factory, and to create an instance just:
+To work with `Users` we need an initialize instance of the `repositories` factory (See <<respositories.adoc#,Repositories>>), and to create an instance just:
 
 ----
 
@@ -55,7 +55,7 @@ When `iamid-provider` call to our `connector.resolve(uid, claims)` method the fi
 const user = await usersRepo.get(uid)
 ----
 
-This `uid` passed as first parameter in the resolve method is the user unique identifier in the OP server, or what is the same, the returned uid by the `insertOrUpdate` method. iThe obtained object is an instance of `User` that is the root object that conatin all the `Connection` objects for a given end user in the OP server. To obtain the authoriztaion data just need to use the `getConnection(systemType)` method as:
+This `uid` passed as first parameter in the resolve method is the user unique identifier in the OP server, or what is the same, the returned uid by the `insertOrUpdate` method. iThe obtained object is an instance of `User` that is the root object that contain all the `Connection` objects for a given end user in the OP server. To obtain the authorization data just need to use the `getConnection(systemType)` method as:
 
 ----
 const { auth } = user.getConnection(SYSTEM_TYPE)
