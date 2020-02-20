@@ -159,7 +159,7 @@ module.exports = function () {
       claims: {
         id_token: {
           assertion_claims: {
-            given_name: { assertion: { $eq: 'John' }, ial: 1, result: [], unresolved: [] }
+            given_name: { assertion: { $eq: 'John' }, ial: 1, match: false, result: [], unresolved: [] }
           }
         },
         userinfo: {

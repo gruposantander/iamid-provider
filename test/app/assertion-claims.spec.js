@@ -37,13 +37,14 @@ module.exports = function () {
       claims: {
         id_token: {
           assertion_claims: {
-            given_name: { essential: false, ial: 1, purpose, assertion: { $eq: 'José' }, result: ['Jo****sé'], unresolved: [] },
-            birthdate: { essential: true, ial: 1, assertion: { $lt: '2000-01-10' }, result: ['1979-08-18'], unresolved: [] },
-            phone_number: { ial: 1, assertion: { $eq: '07523-503388' }, result: ['******3388'], unresolved: [] },
+            given_name: { essential: false, ial: 1, purpose, assertion: { $eq: 'José' }, match: true, result: ['Jo****sé'], unresolved: [] },
+            birthdate: { essential: true, ial: 1, assertion: { $lt: '2000-01-10' }, match: true, result: ['1979-08-18'], unresolved: [] },
+            phone_number: { ial: 1, assertion: { $eq: '07523-503388' }, match: true, result: ['******3388'], unresolved: [] },
             total_balance: {
               essential: true,
               ial: 1,
               assertion: { amount: { $gt: '999.00' } },
+              match: true,
               result: [{ currency: 'GBP', amount: '1002.00' }],
               unresolved: []
             }
@@ -140,10 +141,10 @@ module.exports = function () {
         claims: {
           id_token: {
             assertion_claims: {
-              given_name: { ial: 1, assertion: { $eq: 'José' }, result: ['Jo****sé'], unresolved: [] },
-              family_name: { ial: 1, assertion: { $unknown_operator: 'Gómez' }, result: [], unresolved: [{ type: 'unknown_operator' }] },
-              email: { ial: 1, assertion: { $eq: 'jose.gomez@santander.co.uk' }, result: ['j****z@santander.co.uk'], unresolved: [] },
-              birthdate: { ial: 1, result: [], unresolved: [{ type: 'syntax_error' }] }
+              given_name: { ial: 1, assertion: { $eq: 'José' }, match: true, result: ['Jo****sé'], unresolved: [] },
+              family_name: { ial: 1, assertion: { $unknown_operator: 'Gómez' }, match: false, result: [], unresolved: [{ type: 'unknown_operator' }] },
+              email: { ial: 1, assertion: { $eq: 'jose.gomez@santander.co.uk' }, match: true, result: ['j****z@santander.co.uk'], unresolved: [] },
+              birthdate: { ial: 1, match: false, result: [], unresolved: [{ type: 'syntax_error' }] }
             }
           },
           userinfo: {
