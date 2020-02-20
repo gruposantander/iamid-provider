@@ -32,7 +32,7 @@ Some other specification can be supported when using the https://github.com/panv
 
 [source,bash]
 ----
-npm install --save aimid-provider
+npm install --save @santander/aimid-provider
 ----
 
 Doing an export of the library we will get available different utils exposes by the library, an early definition can be found in <<library.adoc#,IAMID API>>

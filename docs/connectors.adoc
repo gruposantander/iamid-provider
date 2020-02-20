@@ -11,7 +11,7 @@ A connector is to piece of code that "resolve" claims, or what is the same, is t
 
 Technically speaking a connector (also known as resolver) is just a Javascript function object (an async function) with one properties `claims`.
 
-The function accept two parameters, an `auth` object that contain all the needed info to authenticate the End-User against the external system API (see <<User session and credentials>>) and a `requestedClaims` object that contain as keys the name of the claims that should be retrieved by the connector and as value a object with options that should be take into account while obtaining the claims.
+The function accept two parameters, an `uid` that is the unique id identifier of the user in our OP server (see <<User session and credentials>> for more info) and a `requestedClaims` object that contain as keys the name of the claims that should be retrieved by the connector and as value a object with options that should be take into account while obtaining the claims.
 
 .requestedClaims object
 [source,javascript]
@@ -27,7 +27,7 @@ The function accept two parameters, an `auth` object that contain all the needed
 
 The connector function should return a `ClaimResponse` object with the claims value (See <<Domain object that should be created by connector>>)
 
-The connector (function object) should expose a property called `claims` that contain the supported claims by this connector and also the level of assurance, also known as *ial* (See `IamID` specification for more info), so for example a connector that resolve the _"given_name"_ and _"phone_number"_ with self asserted by the external system the connector should expose a `claims` property as:
+The connector (function object) should expose a property called `claims` that contain the supported claims by this connector and also the level of assurance, also known as *ial* (See `IamID` specification for more info), so for example a connector that resolve _"given_name"_ and _"phone_number"_ claims, self asserted by the external system, should expose a `claims` property as:
 
 .claims property example
 [source,javascript]
@@ -47,19 +47,19 @@ So as an example of a code that implement the connector contract we can have som
 .Connector contract example
 [source,javascript]
 ----
-async function exampleResolver (auth, requestedClaims) { <1>
+async function exampleResolver (id, requestedClaims) { <1>
   // Code comes here
 }
 exampleResolver.claims = { claim1: { ial: 1 }, claim2: { ial: 2}, claim3: { ial: 2 } }  <2>
 ----
-<1> Is an `async` function that accept `auth` and `requestedClaims` params.
+<1> Is an `async` function that accept `id` and `requestedClaims` params.
 <2> Has a `claims` property that is an object that define the claims resolved by this connector.
 
 == How to implement a connector?
 
 There is no more requirement in how to implement a Connector, just fulfilling the contract in an async way is ok, but you can implement the connector using some kind of REST client, doing directly the calls to other system inside the connector function....
 
-Normally the data from the user will be in a remote API outside the OP server so the developer can create some kind of Rest client to obtain the information, this is the case for https://uk-gitlab.almuk.santanderuk.corp/verified-id/op-server[Santander-uk project ], inside the `src/minibank` folder there exist a `client.js` that implement the connection to the minibank API using the library `node-fetch`, and inside the connectors implementations `src/minibank/resolver.js` the client is used to manage the connections.
+Normally the data from the user will be in a remote API outside the OP server so the developer can create some kind of Rest client to obtain the information, this is the case for https://uk-gitlab.almuk.santanderuk.corp/verified-id/op-server[Santander-uk project], inside the `src/minibank` folder there exist a `client.js` that implement the connection to the minibank API using the library `node-fetch`, and inside the connectors implementations `src/minibank/resolver.js` the client is used to manage the connections.
 
 As a basic implementation example of a Connector we can have something like:
 ----
@@ -83,9 +83,9 @@ exampleResolver.claims = { phone_number: { ial: 1 }, email: { ial: 1 } } <5>
 
 == Domain object that should be created by connector
 
-The connector function should return a `ClaimResponse` instance, this class contain for each claim that is requested using the `requestedClaims` parameter the connector a `Claim` object. The way to create a `ClaimResponse` is passing an js object with the claim name as key an a `Claim` instance as value (See examples below)
+The connector function should return a `ClaimResponse` instance, this class contain for each claim that is requested using the `requestedClaims` parameter a `Claim` object. The way to create a `ClaimResponse` is passing a js Object with the claim name as key an a `Claim` instance as value (See examples below)
 
-A `Claim` object containing an array with the resolved values and another array with the unresolved types. Resolved and unresolved values are arrays because one connector can return more than one value for each claim, for example in the case of the _phone_number_ claim an End-User can have more than one value registered, this array is returned and presented to the user in the consent screen so End-User can select the value that want to share with the RP.
+A `Claim` object contain an array with the resolved values and another array with the unresolved types. Resolved and unresolved values are arrays because one connector can return more than one value for each claim, for example in the case of the _"phone_number"_ an End-User can have more than one value registered, this array is returned and presented to the user in the consent screen so End-User can select the value that want to share with the RP.
 
 Each item inside the _resolved_ array is a `Resolved` instance, what is just an object that contain a `value` and a `ial`, the ial info will be used to filter values in case that don't match the minimum level requested by the RP.
 
@@ -114,14 +114,25 @@ const result = new ClaimResponse({ email: emailClaim, given_name: nameClaim })
 
 Is out of the scope of the `iamid-provider` how exactly the authentication info for the End-User is obtained, the time to obtain this auth info is in the Login process, or what is the same in the Login endpoint (that should be implemented by the developer). See <<endpoints.adoc#,Implement the interactions endpoints>> for more info. Just to highlight that connectors should use resource owner credential for API authorization.
 
-To allow connectors persist this session info `iamid-provider` provide a repository, see more in <<usermanagment.adoc#,User authorization data management>>, but the exactly data that is store inside the `auth` object and how to refresh it's responsibility of the OP developer, when calling to the connector function the `auth` object passed as input will be exactly the same object stored by the developer in the login process.
+To allow connectors persist this session info `iamid-provider` provide a repository, see more in <<usermanagment.adoc#,User authorization data management>>, but the exactly data that is store inside the `auth` object and how to refresh it's responsibility of the OP developer, when calling to the connector function the `uid` passed as input will be used to obtain the `auth` info from the user repository.
+
+If you review the code in the resolver develop in the reference project https://uk-gitlab.almuk.santanderuk.corp/verified-id/op-server[Santander-uk project] you will notice that instead of a `uid` the resolvers has as input the `auth`, this is because in the resolver there are a refresh logic that already extract the info from the user repository and a function to wrap this behavior has been created before call the proxy, this avoid to call in each different resolver the same logic.
+
+[source,js]
+----
+this.resolver = async (uid, claims) => {
+  const refreshed = await refreshResolver(uid)
+  return proxy(refreshed, claims)
+}
+----
+
 
 == Using the proxyResolvers
 
 To provide the connectors (one or more) to `iamid-provider` the developer should use a `proxyResolvers`, the proxy is a "grouper" that allow developers to have multiple connectors for resolve different claims without create a mess, (for example connectors can be split by functionality, domain...).
 The proxy contain the next logic:
 - Filter claims that cannot be resolve by a connector, based on the exposed `claim` parameter.
-- Choose the correct connectors based on the requested claims (try to make avoid uneeded calls)
+- Choose the correct connectors based on the requested claims (try to make avoid unended calls)
 - Filter result based on requested `ial`.
 
 Use a proxy is as easy as:
