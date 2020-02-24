@@ -154,6 +154,26 @@ module.exports = function () {
       })
   })
 
+  it('should jump login step when user already has a session', async function () {
+    const agent = this.agent()
+    const code = await this.goToToken(agent)
+    await this.token(agent, code)
+
+    const requestObject = { nonce: 'other-nonce', ...DEFAULT_REQUEST_OBJECT }
+    const { body } = await this.initiateAuthorize(agent, { requestObject })
+
+    const { header: { location: interactionURI } } = await this.authorize(agent, body.request_uri)
+      .expect(302)
+
+    const interactionId = getInteractionIdFromInteractionUri(interactionURI)
+
+    const { body: bodyInteraction } = await this.interaction(agent, interactionURI)
+      .expect(200)
+
+    equal(bodyInteraction.interaction, 'consent')
+    equal(bodyInteraction.interaction_id, interactionId)
+  })
+
   it('should complete full-trip without "redirect_uri" when client has just one', async function () {
     const agent = this.agent()
     const { redirect_uri: _, ...defaultReqObj } = DEFAULT_REQUEST_OBJECT
