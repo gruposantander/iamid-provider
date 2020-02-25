@@ -3,6 +3,7 @@
   "claims_parameter_supported": true,
   "claims_supported": [
     "sub",
+    "txn",
     "sid",
     "auth_time",
     "iss",

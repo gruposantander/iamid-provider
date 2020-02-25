@@ -135,7 +135,8 @@ module.exports = function () {
         total_balance: claims.total_balance.resolved[0].value,
         email: claims.email.resolved[0].value,
         phone_number: claims.phone_number.resolved[0].value,
-        birthdate: claims.birthdate.resolved[0].value
+        birthdate: claims.birthdate.resolved[0].value,
+        txn: idToken.txn
       })
   })
 
@@ -279,6 +280,7 @@ module.exports = function () {
       .set('Authorization', 'Bearer ' + accessToken)
       .expect(200, {
         sub: 'e3def28859bc43cad610082f60d663e431f73d1c7a26fc06d8c67ab730978e6f',
+        txn: idToken.txn,
         family_name: 'Ramírez Escribano'
       })
   })

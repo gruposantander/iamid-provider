@@ -7,8 +7,7 @@ const {
   PAYLOAD_AUTH, jwtSign, CLIENT_ASSERTION_TYPE, DEFAULT_REQUEST_OBJECT,
   REDIRECT_URI, OP_ID, CLIENT_ID, jwtVerify, error
 } = require('./fixtures')
-const assert = require('assert')
-const { strictEqual, deepStrictEqual } = assert
+const { equal, deepEqual, ok } = require('assert').strict
 
 module.exports = function () {
   const DEFAULT = {
@@ -59,16 +58,17 @@ module.exports = function () {
         .send(`redirect_uri=${REDIRECT_URI}`)
         .expect(200)
 
-      strictEqual(scope, 'openid')
-      strictEqual(tokenType, 'Bearer')
-      assert(accessToken.length > 0)
+      equal(scope, 'openid')
+      equal(tokenType, 'Bearer')
+      ok(accessToken.length > 0)
 
       const idToken = jwtVerify(idTokenStr)
-      strictEqual(idToken.iss, OP_ID)
-      strictEqual(idToken.aud, CLIENT_ID)
-      deepStrictEqual(idToken.given_name, givenName)
-      deepStrictEqual(idToken.family_name, undefined)
-      deepStrictEqual(idToken.email, undefined)
+      ok(idToken.txn)
+      equal(idToken.iss, OP_ID)
+      equal(idToken.aud, CLIENT_ID)
+      deepEqual(idToken.given_name, givenName)
+      deepEqual(idToken.family_name, undefined)
+      deepEqual(idToken.email, undefined)
     })
   })
 
@@ -134,5 +134,14 @@ module.exports = function () {
       .send('grant_type=authorization_code')
       .send('redirect_uri=http://other.com/hi')
       .expect(400, error('invalid_grant', 'grant request is invalid'))
+  })
+  it.only('should return txn as consent id', async function () {
+    const agent = this.agent()
+    const code = await this.goToToken(agent)
+    const { body: { id_token: tokenStr } } = await this.token(agent, code)
+    const { txn } = jwtVerify(tokenStr)
+    const consents = await this.repositories.getRepository('consents')
+    const consent = await consents.findById(txn)
+    ok(consent)
   })
 }
