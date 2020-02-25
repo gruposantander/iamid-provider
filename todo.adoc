@@ -1,11 +1,14 @@
 = ToDo
 
+* Memory Repository and MongoDB Repository should return the same when not found items, now one return undefined other one null.
+
 == Backlog
 
 * Remove sensitive class and use Resolved class only
 * IAmId should start the server
 * Unauthorized test: see coverage
 * Create our own ESLint config (extending standard???)
+* When is possible to have auto consent, we need to provide the accountID to Consent Object in another step.
 
 == Clean Up
 
