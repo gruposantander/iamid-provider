@@ -93,9 +93,9 @@ module.exports = function () {
   it('should fail when using a "request_uri" from another client (RP)', async function () {
     const agent = this.agent()
     const { body } = await this.initiateAuthorize(agent)
-    const requestUri = body.request_uri
+    const requestURI = body.request_uri
     await agent.get(AUTH_PATH)
-      .query({ request_uri: requestUri, client_id: CLIENT_ID_ALT })
+      .query({ request_uri: requestURI, client_id: CLIENT_ID_ALT })
       .expect(302)
       .expect((response) => {
         const location = new URL(response.header.location)

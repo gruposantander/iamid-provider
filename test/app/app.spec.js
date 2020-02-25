@@ -76,10 +76,10 @@ const suite = function () {
       const jwtRequest = jwtSign(requestObject)
       return this.initiateAuthorizeWithSigns(agent, jwtSec, jwtRequest, status)
     }
-    this.authorize = (agent, requestUri, options = {}) => {
+    this.authorize = (agent, requestURI, options = {}) => {
       const { clientId = CLIENT_ID } = options
       return agent.get(AUTH_PATH)
-        .query({ request_uri: requestUri, client_id: clientId })
+        .query({ request_uri: requestURI, client_id: clientId })
         .expect(302)
     }
     this.interaction = (agent, interactionURI) => {
