@@ -135,7 +135,7 @@ module.exports = function () {
       .send('redirect_uri=http://other.com/hi')
       .expect(400, error('invalid_grant', 'grant request is invalid'))
   })
-  it.only('should return txn as consent id', async function () {
+  it('should return txn as consent id', async function () {
     const agent = this.agent()
     const code = await this.goToToken(agent)
     const { body: { id_token: tokenStr } } = await this.token(agent, code)
