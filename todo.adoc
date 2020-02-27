@@ -1,5 +1,7 @@
 = ToDo
 
+* Id is duplicated in data base
+* Reproduce error of several documents with same client and user in consent database
 * Memory Repository and MongoDB Repository should return the same when not found items, now one return undefined other one null.
 
 == Backlog

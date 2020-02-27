@@ -29,7 +29,7 @@
   "author": "Innovation Hub",
   "license": "MIT",
   "dependencies": {
-    "@santander/oidc-provider": "1.0.0-beta.18",
+    "@santander/oidc-provider": "1.0.0-beta.19",
     "debug": "^4.1.1",
     "google-libphonenumber": "^3.2.6",
     "koa": "^2.11.0",

@@ -135,7 +135,8 @@ module.exports = function () {
       .send('redirect_uri=http://other.com/hi')
       .expect(400, error('invalid_grant', 'grant request is invalid'))
   })
-  it('should return txn as consent id', async function () {
+
+  it('should return consent id as txn', async function () {
     const agent = this.agent()
     const code = await this.goToToken(agent)
     const { body: { id_token: tokenStr } } = await this.token(agent, code)
@@ -143,5 +144,20 @@ module.exports = function () {
     const consents = await this.repositories.getRepository('consents')
     const consent = await consents.findById(txn)
     ok(consent)
+  })
+
+  it.skip('should return proper responses in subsequent calls (bug)', async function () {
+    const agent = this.agent()
+    const getName = async (options) => {
+      const code = await this.goToToken(agent, options)
+      const { body: { id_token: idTokenStr } } = await this.token(agent, code)
+      return jwtVerify(idTokenStr).given_name
+    }
+    ok(await getName())
+    const consentRequest = {
+      id_token: { approved: { given_name: -1 } },
+      approved_scopes: ['openid']
+    }
+    ok(!await getName({ consentRequest }))
   })
 }

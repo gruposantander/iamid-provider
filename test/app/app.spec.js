@@ -86,6 +86,7 @@ const suite = function () {
       return agent.get(interactionURI).expect(200)
     }
     this.consent = (agent, interactionId, options = {}) => {
+      // TODO use current syntax
       const {
         consentRequest = {
           id_token: { approved_claims: ['given_name'] },
