@@ -1,5 +1,6 @@
 = ToDo
 
+* Put consent repo name at Consent level so is the same in all places please.
 * Id is duplicated in data base
 * Reproduce error of several documents with same client and user in consent database
 * Memory Repository and MongoDB Repository should return the same when not found items, now one return undefined other one null.
@@ -15,3 +16,8 @@
 == Clean Up
 
 * Review Jenkins files
+
+== Opensource
+* Refactor router and put the logic in the models or in other files.
+* We are forcing the consent what should we do with that? Thinks that we need to implement things in order to support all the scenarios.
+* We are changing the ctx in two namespaces put all inside iamid, the interaction data also... and document.

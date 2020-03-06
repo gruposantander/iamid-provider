@@ -146,7 +146,7 @@ module.exports = function () {
     ok(consent)
   })
 
-  it.skip('should return proper responses in subsequent calls (bug)', async function () {
+  it('should return proper responses in subsequent calls (bug)', async function () {
     const agent = this.agent()
     const getName = async (options) => {
       const code = await this.goToToken(agent, options)
