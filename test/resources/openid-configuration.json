@@ -90,6 +90,9 @@
     ],
     "string": [
       "$eq"
+    ],
+    "boolean": [
+      "$eq"
     ]
   },
   "assertion_claims_supported": true,

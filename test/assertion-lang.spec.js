@@ -44,6 +44,7 @@ module.exports = function () {
       check(['123.00', '123', '123.01'], { $eq: '123.0' }, ['123.00', '123'], { type: 'decimal' })
       check(['1979-04-04', '1982-02-01'], { $eq: '1979-04-04' }, ['1979-04-04'], { type: 'date' })
       check([12, 13], { $eq: 12 }, [12], { type: 'number' })
+      check([true, false], { $eq: true }, [true], { type: 'boolean' })
     })
   })
   describe('$gt operator', function () {
