@@ -8,7 +8,7 @@
   "customAuthorizationEndpoint": "https://verifiedid-nginx-spa-verifiedid-pro.e4ff.pro-eu-west-1.openshiftapps.com",
   "discovery": {
     "claims_in_assertion_claims_supported": {
-      "total_balance": { "type": "object", "properties": { "amount": { "type": "decimal" }, "currency": { "type": "string" } } },
+      "total_balance": { "type": "object", "props": { "amount": { "type": "decimal" }, "currency": { "type": "string" } } },
       "phone_number": { "type": "phone_number" },
       "email": { "type": "string" },
       "birthdate": { "type": "date" },

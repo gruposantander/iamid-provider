@@ -257,9 +257,9 @@ module.exports = function () {
     const claims = {
       id_token: {
         assertion_claims: {
-          given_name: { assertion: { $eq: 'banana' } },
+          given_name: { assertion: { eq: 'banana' } },
           family_name: { assertion: { $sj: 3 } },
-          custard_apple: { assertion: { $eq: 'not a banana' } }
+          custard_apple: { assertion: { eq: 'not a banana' } }
         }
       },
       userinfo: {

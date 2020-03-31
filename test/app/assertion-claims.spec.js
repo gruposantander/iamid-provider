@@ -17,10 +17,10 @@ module.exports = function () {
     const claims = {
       id_token: {
         assertion_claims: {
-          given_name: { essential: false, purpose, assertion: { $eq: 'José' } },
-          birthdate: { essential: true, assertion: { $lt: '2000-01-10' } },
-          phone_number: { assertion: { $eq: '07523-503388' } },
-          total_balance: { essential: true, assertion: { amount: { $gt: '999.00' } } }
+          given_name: { essential: false, purpose, assertion: { eq: 'José' } },
+          birthdate: { essential: true, assertion: { lt: '2000-01-10' } },
+          phone_number: { assertion: { eq: '07523-503388' } },
+          total_balance: { essential: true, assertion: { props: { amount: { gt: '999.00' } } } }
         }
       }
     }
@@ -37,13 +37,13 @@ module.exports = function () {
       claims: {
         id_token: {
           assertion_claims: {
-            given_name: { essential: false, ial: 1, purpose, assertion: { $eq: 'José' }, match: true, result: ['Jo****sé'], unresolved: [] },
-            birthdate: { essential: true, ial: 1, assertion: { $lt: '2000-01-10' }, match: true, result: ['1979-08-18'], unresolved: [] },
-            phone_number: { ial: 1, assertion: { $eq: '07523-503388' }, match: true, result: ['******3388'], unresolved: [] },
+            given_name: { essential: false, ial: 1, purpose, assertion: { eq: 'José' }, match: true, result: ['Jo****sé'], unresolved: [] },
+            birthdate: { essential: true, ial: 1, assertion: { lt: '2000-01-10' }, match: true, result: ['1979-08-18'], unresolved: [] },
+            phone_number: { ial: 1, assertion: { eq: '07523-503388' }, match: true, result: ['******3388'], unresolved: [] },
             total_balance: {
               essential: true,
               ial: 1,
-              assertion: { amount: { $gt: '999.00' } },
+              assertion: { props: { amount: { gt: '999.00' } } },
               match: true,
               result: [{ currency: 'GBP', amount: '1002.00' }],
               unresolved: []
@@ -69,17 +69,20 @@ module.exports = function () {
       total_balance: { ials: [1] }
     }))
   })
-  ;[
+
+  const options = [
     ['current', { assertions: { given_name: 0, family_name: 29, email: -1 } }],
     ['legacy', { approved_assertions: ['given_name', 'family_name'] }]
-  ].forEach(([name, consentIdToken]) => {
+  ]
+
+  options.forEach(([name, consentIdToken]) => {
     it(`should be accepted or declined at consent endpoint (${name})`, async function () {
       const agent = this.agent()
       const assertions = {
-        given_name: { assertion: { $eq: 'José' } },
-        family_name: { assertion: { $eq: 'Gómez' } },
-        email: { assertion: { $eq: 'jose.gomez@santander.co.uk' } },
-        birthdate: { assertion: { $lte: '2000-01-01' } }
+        given_name: { assertion: { eq: 'José' } },
+        family_name: { assertion: { eq: 'Gómez' } },
+        email: { assertion: { eq: 'jose.gomez@santander.co.uk' } },
+        birthdate: { assertion: { lte: '2000-01-01' } }
       }
       const claims = { id_token: { assertion_claims: assertions } }
 
@@ -102,7 +105,7 @@ module.exports = function () {
 
     it(`should fail if user accept an assertion claim that is not been requested (${name})`, async function () {
       const agent = this.agent()
-      const assertion = { $eq: 'José' }
+      const assertion = { eq: 'José' }
       const claims = {
         id_token: { assertion_claims: { given_name: { assertion } } }
       }
@@ -120,11 +123,11 @@ module.exports = function () {
     it(`should return an error when any operator is not recognized (${name})`, async function () {
       const agent = this.agent()
       const assertions = {
-        given_name: { assertion: { $eq: 'José' } },
-        family_name: { assertion: { $unknown_operator: 'Gómez' } },
-        email: { assertion: { $eq: 'jose.gomez@santander.co.uk' } },
+        given_name: { assertion: { eq: 'José' } },
+        family_name: { assertion: { unknown_operator: 'Gómez' } },
+        email: { assertion: { eq: 'jose.gomez@santander.co.uk' } },
         birthdate: {},
-        custard_apple: { assertion: { $eq: 'This is not a banana' } }
+        custard_apple: { assertion: { eq: 'This is not a banana' } }
       }
       const claims = { id_token: { assertion_claims: assertions } }
 
@@ -141,9 +144,9 @@ module.exports = function () {
         claims: {
           id_token: {
             assertion_claims: {
-              given_name: { ial: 1, assertion: { $eq: 'José' }, match: true, result: ['Jo****sé'], unresolved: [] },
-              family_name: { ial: 1, assertion: { $unknown_operator: 'Gómez' }, match: false, result: [], unresolved: [{ type: 'unknown_operator' }] },
-              email: { ial: 1, assertion: { $eq: 'jose.gomez@santander.co.uk' }, match: true, result: ['j****z@santander.co.uk'], unresolved: [] },
+              given_name: { ial: 1, assertion: { eq: 'José' }, match: true, result: ['Jo****sé'], unresolved: [] },
+              family_name: { ial: 1, assertion: { unknown_operator: 'Gómez' }, match: false, result: [], unresolved: [{ type: 'unknown_operator' }] },
+              email: { ial: 1, assertion: { eq: 'jose.gomez@santander.co.uk' }, match: true, result: ['j****z@santander.co.uk'], unresolved: [] },
               birthdate: { ial: 1, match: false, result: [], unresolved: [{ type: 'syntax_error' }] }
             }
           },
@@ -175,7 +178,7 @@ module.exports = function () {
     const claims = {
       id_token: {
         assertion_claims: {
-          given_name: { assertion: { $eq: 'José' } }
+          given_name: { assertion: { eq: 'José' } }
         }
       }
     }

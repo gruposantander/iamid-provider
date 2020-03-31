@@ -56,7 +56,7 @@ Is a JSON object that provide additional information in the discovery document (
 * assertion_claims_supported: A boolean that indicates if the OP support `assertion_claims`.
 * digital_id_certified_data_extension: A boolean value that indicate if this OP support the IAMID profile.
 * claims_in_assertion_claims_supported: An object describing what of the exposed claims support assertions, also provide the type of the claim. The key inside the object is the name of the claim, so for exmaple `birthdate: { type: 'date' }` means that `birthdate` claim is of type `date`.
-* assertion_claims_query_language_supported: An Object that contain as keys the name of the claim type and as values an array with all the operators that this type support. For example `string: ['$eq']` means that claims of type string support the `$eq` operator.
+* assertion_claims_query_language_supported: An Object that contain as keys the name of the claim type and as values an array with all the operators that this type support. For example `string: ['eq']` means that claims of type string support the `eq` operator.
 
 See complete example in file link:../lib/configuration/default-environment.js[default-environment.js]
 

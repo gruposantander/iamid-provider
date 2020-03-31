@@ -143,8 +143,8 @@ module.exports = function () {
   it('should filter out non supported assertion claims', async function () {
     const agent = this.agent()
     const assertionClaims = {
-      given_name: { assertion: { $eq: 'John' } },
-      banana: { assertion: { $eq: 'banana' } }
+      given_name: { assertion: { eq: 'John' } },
+      banana: { assertion: { eq: 'banana' } }
     }
     const requestObject = { ...DEFAULT_REQUEST_OBJECT, claims: { id_token: { assertion_claims: assertionClaims } } }
 
@@ -159,7 +159,7 @@ module.exports = function () {
       claims: {
         id_token: {
           assertion_claims: {
-            given_name: { assertion: { $eq: 'John' }, ial: 1, match: false, result: [], unresolved: [] }
+            given_name: { assertion: { eq: 'John' }, ial: 1, match: false, result: [], unresolved: [] }
           }
         },
         userinfo: {

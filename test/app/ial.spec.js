@@ -15,12 +15,12 @@ module.exports = function () {
           id_token: {
             birthdate: null, // Default ial 1
             email: { ial: 2 },
-            assertion_claims: { birthdate: { assertion: { $gte: '1979-04-04' }, ial: 2 } }
+            assertion_claims: { birthdate: { assertion: { gte: '1979-04-04' }, ial: 2 } }
           },
           userinfo: {
             birthdate: { ial: 2 },
             email: { ial: 3 },
-            assertion_claims: { birthdate: { assertion: { $gte: '1979-04-03' }, ial: 3 } }
+            assertion_claims: { birthdate: { assertion: { gte: '1979-04-03' }, ial: 3 } }
           }
         }
       }
@@ -50,14 +50,14 @@ module.exports = function () {
         birthdate: { ial: 1, unresolved, result: result1 },
         email: { ial: 2, unresolved, result: ['v****z@santander.co.uk'] },
         assertion_claims: {
-          birthdate: { assertion: { $gte: '1979-04-04' }, ial: 2, match: true, result: result2a, unresolved }
+          birthdate: { assertion: { gte: '1979-04-04' }, ial: 2, match: true, result: result2a, unresolved }
         }
       },
       userinfo: {
         birthdate: { ial: 2, result: result2b, unresolved },
         email: { ial: 3, unresolved: [{ type: 'not_found' }], result: [] },
         assertion_claims: {
-          birthdate: { assertion: { $gte: '1979-04-03' }, ial: 3, match: true, result: result3, unresolved }
+          birthdate: { assertion: { gte: '1979-04-03' }, ial: 3, match: true, result: result3, unresolved }
         }
       }
     })

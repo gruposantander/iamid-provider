@@ -64,42 +64,42 @@
   ],
   "assertion_claims_query_language_supported": {
     "date": [
-      "$eq",
-      "$gt",
-      "$lt",
-      "$gte",
-      "$lte"
+      "eq",
+      "gt",
+      "lt",
+      "gte",
+      "lte"
     ],
     "decimal": [
-      "$eq",
-      "$gt",
-      "$lt",
-      "$gte",
-      "$lte"
+      "eq",
+      "gt",
+      "lt",
+      "gte",
+      "lte"
     ],
     "number": [
-      "$eq",
-      "$gt",
-      "$lt",
-      "$gte",
-      "$lte"
+      "eq",
+      "gt",
+      "lt",
+      "gte",
+      "lte"
     ],
     "object": [],
     "phone_number": [
-      "$eq"
+      "eq"
     ],
     "string": [
-      "$eq"
+      "eq"
     ],
     "boolean": [
-      "$eq"
+      "eq"
     ]
   },
   "assertion_claims_supported": true,
   "claims_in_assertion_claims_supported": {
     "total_balance": {
       "type": "object",
-      "properties": {
+      "props": {
         "amount": {
           "type": "decimal"
         },

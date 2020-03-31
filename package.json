@@ -26,6 +26,7 @@
   "author": "Innovation Hub",
   "license": "MIT",
   "dependencies": {
+    "@gruposantander/json-el": "^0.0.2",
     "@gruposantander/oidc-provider": "1.0.0-beta.21",
     "debug": "^4.1.1",
     "google-libphonenumber": "^3.2.6",
