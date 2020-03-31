@@ -1,6 +1,6 @@
 {
-  "name": "@santander/iamid-provider",
-  "version": "0.4.0-16",
+  "name": "@gruposantander/iamid-provider",
+  "version": "0.4.0-17",
   "description": "OpenID, OAuth 2.0 and IAMID Authorization Server implementation for Node.js",
   "main": "index.js",
   "scripts": {
@@ -11,10 +11,7 @@
     "coverage": "nyc npm run test:unit-no-only",
     "test": "npm run lint && npm run coverage"
   },
-  "repository": {
-    "type": "git",
-    "url": "ssh://git@uk-gitlab.almuk.santanderuk.corp:2220/verified-id/iamid-provider.git"
-  },
+  "repository": "gruposantander/iamid-provider",
   "keywords": [
     "Node",
     "OIDC",
@@ -29,7 +26,7 @@
   "author": "Innovation Hub",
   "license": "MIT",
   "dependencies": {
-    "@santander/oidc-provider": "1.0.0-beta.20",
+    "@gruposantander/oidc-provider": "1.0.0-beta.21",
     "debug": "^4.1.1",
     "google-libphonenumber": "^3.2.6",
     "koa": "^2.11.0",
@@ -72,6 +69,6 @@
     }
   },
   "publishConfig": {
-    "registry": "https://nexus.almuk.santanderuk.corp/repository/npm-releases/"
+    "registry": "https://npm.pkg.github.com/"
   }
 }
