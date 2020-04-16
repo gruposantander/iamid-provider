@@ -20,7 +20,8 @@ module.exports = function () {
           given_name: { essential: false, purpose, assertion: { eq: 'José' } },
           birthdate: { essential: true, assertion: { lt: '2000-01-10' } },
           phone_number: { assertion: { eq: '07523-503388' } },
-          total_balance: { essential: true, assertion: { props: { amount: { gt: '999.00' } } } }
+          total_balance: { essential: true, assertion: { props: { amount: { gt: '999.00' } } } },
+          bank_account: { essential: true, assertion: { props: { identifiers: { some: { props: { identification: { eq: '09012700046721' }, type: { eq: 'UK.SortCodeAccountNumber' } } } } } } }
         }
       }
     }
@@ -30,7 +31,8 @@ module.exports = function () {
       given_name: new Claim([new Resolved('José', 2)]),
       birthdate: new Claim([new Resolved('1979-08-18', 2)]),
       phone_number: new Claim([new Resolved('+447523503388', 2)]),
-      total_balance: new Claim([new Resolved({ currency: 'GBP', amount: '1002.00' }, 2)])
+      total_balance: new Claim([new Resolved({ currency: 'GBP', amount: '1002.00' }, 2)]),
+      bank_account: new Claim([new Resolved({ id: '09012700046721', type: 'Personal', currency: 'GBP', identifiers: [{ type: 'UK.SortCodeAccountNumber', identification: '09012700046721' }] }, 3)])
     })
     const interactionId = getInteractionIdFromInteractionUri(uri)
     const expected = {
@@ -46,6 +48,14 @@ module.exports = function () {
               assertion: { props: { amount: { gt: '999.00' } } },
               match: true,
               result: [{ currency: 'GBP', amount: '1002.00' }],
+              unresolved: []
+            },
+            bank_account: {
+              essential: true,
+              ial: 1,
+              assertion: { props: { identifiers: { some: { props: { identification: { eq: '09012700046721' }, type: { eq: 'UK.SortCodeAccountNumber' } } } } } },
+              match: true,
+              result: [{ id: '09012700046721', type: 'Personal', currency: 'GBP', identifiers: [{ type: 'UK.SortCodeAccountNumber', identification: '09012700046721' }] }],
               unresolved: []
             }
           }
@@ -66,7 +76,8 @@ module.exports = function () {
       given_name: { ials: [1] },
       birthdate: { ials: [1] },
       phone_number: { ials: [1] },
-      total_balance: { ials: [1] }
+      total_balance: { ials: [1] },
+      bank_account: { ials: [1] }
     }))
   })
 

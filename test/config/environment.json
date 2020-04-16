@@ -9,6 +9,7 @@
   "discovery": {
     "claims_in_assertion_claims_supported": {
       "total_balance": { "type": "object", "props": { "amount": { "type": "decimal" }, "currency": { "type": "string" } } },
+      "bank_account": { "type": "object", "props": { "id": { "type": "string" }, "currency": { "type": "string" }, "type": { "type": "string" }, "identifiers": { "type": "array", "items": { "type": "object", "props": { "type": { "type": "string" }, "identification": { "type": "string" } } } } } },
       "phone_number": { "type": "phone_number" },
       "email": { "type": "string" },
       "birthdate": { "type": "date" },
@@ -23,7 +24,8 @@
     "email": null,
     "birthdate": null,
     "family_name": null,
-    "given_name": null
+    "given_name": null,
+    "bank_account": null
   },
   "masks": {
     "email": { "type": "email" },

@@ -13,7 +13,8 @@
     "email",
     "birthdate",
     "family_name",
-    "given_name"
+    "given_name",
+    "bank_account"
   ],
   "code_challenge_methods_supported": [
     "S256"
@@ -93,6 +94,11 @@
     ],
     "boolean": [
       "eq"
+    ],
+    "array": [
+      "none",
+      "every",
+      "some"
     ]
   },
   "assertion_claims_supported": true,
@@ -106,6 +112,34 @@
         "currency": {
           "type": "string"
         }
+      }
+    },
+    "bank_account": {
+      "type": "object",
+      "props": {
+          "id": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "identifiers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "props": {
+                "type": {
+                  "type": "string"
+                },
+                "identification": {
+                  "type": "string"
+                }
+              }
+            }
+          }
       }
     },
     "phone_number": {
