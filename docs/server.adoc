@@ -1,6 +1,6 @@
 = Running Server
 
-After setup our <<config.adoc#,config>>, create the <<connectors.adoc#,connectors>> and implement the <<endpoints.adoc#,interactions endpoints>> is time to put all together and can't be more easy, as commented before you can use as reference the https://uk-gitlab.almuk.santanderuk.corp/verified-id/op-server[Santander-uk project] but let us see an example in code here:
+After setup our <<config.adoc#,config>>, create the <<connectors.adoc#,connectors>> and implement the <<endpoints.adoc#,interactions endpoints>> is time to put all together and can't be more easy, as commented before you can use as reference the https://github.com/gruposantander/digital-trust-universal-server[DTP Universal Server project] but let us see an example in code here:
 
 .OpServer.js
 ----
